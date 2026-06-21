@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scenografia"
+version = "0.1.0"
+description = "AI-powered theatrical scenic design generation CLI"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Scenografia Contributors"}
+]
+
+dependencies = [
+    "httpx>=0.25.0",
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.0.0",
+    "Pillow>=10.0.0",
+    "opencv-python>=4.8.0",
+    "numpy>=1.24.0",
+    "typer>=0.9.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+]
+
+[project.scripts]
+scenografia = "scenografia.main:app"
+
+[project.urls]
+Repository = "https://github.com/your-org/scenografia"
+Documentation = "https://github.com/your-org/scenografia#readme"
+
+[tool.setuptools]
+packages = ["scenografia"]
+
+[tool.setuptools.package-data]
+scenografia = ["py.typed"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --cov=src/scenografia --cov-report=term-missing"

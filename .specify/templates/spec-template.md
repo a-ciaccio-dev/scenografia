@@ -93,6 +93,10 @@
 - **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
 - **FR-005**: System MUST [behavior, e.g., "log all security events"]
 
+When the constitution defines mandatory artifact, security, or style constraints,
+the generated requirements MUST encode them explicitly as functional or
+non-functional requirements rather than leaving them implicit.
+
 *Example of marking unclear requirements:*
 
 - **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
@@ -129,3 +133,4 @@
 - [Assumption about scope boundaries, e.g., "Mobile support is out of scope for v1"]
 - [Assumption about data/environment, e.g., "Existing authentication system will be reused"]
 - [Dependency on existing system/service, e.g., "Requires access to the existing user profile API"]
+- [Artifact language assumption, if relevant, e.g., "Specification and planning artifacts are maintained in English"]

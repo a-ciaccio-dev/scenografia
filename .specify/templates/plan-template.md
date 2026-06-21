@@ -40,7 +40,21 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- [ ] Python-first and CLI-first architecture preserved.
+- [ ] `.venv` is the only application dependency environment and `pyproject.toml`
+  is the source of dependency intent.
+- [ ] Secrets are sourced from `.env` or equivalent local environment injection;
+  no keys are hardcoded or committed.
+- [ ] Output design persists the final image, final prompt, negative prompt,
+  structured brief, generation metadata, validation report, and processed
+  sketch when applicable.
+- [ ] All generated artifacts are written under `output/` with timestamped,
+  human-readable run directories.
+- [ ] The scenic style contract is enforced in prompt generation and validation.
+- [ ] The architecture names distinct agents or tools with single responsibilities
+  and clear test seams.
+- [ ] Tasks, implementation, commit, and push remain blocked until explicit user
+  approval after planning.
 
 ## Project Structure
 
