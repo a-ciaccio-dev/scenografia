@@ -42,6 +42,9 @@ class GenerationRequest(BaseModel):
     # Sketch mode options
     refine_sketch: bool = Field(False, description="Apply AI refinement to sketch")
     
+    # Selected style
+    selected_style: Optional[str] = Field("Default", description="Selected User Style name")
+    
     class Config:
         use_enum_values = False
         json_schema_extra = {

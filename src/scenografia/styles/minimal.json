@@ -1,0 +1,6 @@
+{
+  "name": "Minimal",
+  "description": "stile scenografico minimalista",
+  "prompt_additions": "minimal stage composition, few scenic elements, geometric forms, large empty spaces, simple theatrical composition",
+  "negative_additions": "clutter, excessive detail, crowded composition, complex ornaments"
+}

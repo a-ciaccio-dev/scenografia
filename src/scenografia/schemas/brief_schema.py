@@ -58,6 +58,11 @@ class StructuredBrief(BaseModel):
         description="Generation constraints"
     )
     
+    selected_style: Optional[str] = Field(
+        "Default",
+        description="Selected User Style name"
+    )
+    
     class Config:
         use_enum_values = False
         json_schema_extra = {

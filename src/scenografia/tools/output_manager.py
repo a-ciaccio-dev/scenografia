@@ -54,6 +54,21 @@ class OutputManager:
     ) -> Dict[str, Path]:
         """Persist artifacts for a text-mode generation run."""
         output_dir = output_dir or OutputManager.create_output_directory(brief["scene_description"])
+        
+        # Load style info
+        from scenografia.styles.loader import load_style_by_name
+        style_name = brief.get("selected_style", "Default")
+        style_dict = load_style_by_name(style_name)
+        
+        # Save style.json in run folder
+        style_path = OutputManager.save_json_artifact(output_dir, "style.json", style_dict)
+        
+        # Enrich metadata
+        metadata.style_name = style_dict.get("name")
+        metadata.style_description = style_dict.get("description")
+        metadata.style_prompt_additions = style_dict.get("prompt_additions")
+        metadata.style_negative_additions = style_dict.get("negative_additions")
+
         artifacts = OutputManager.save_generation_artifacts(
             output_dir=output_dir,
             final_image_bytes=response.image_data,
@@ -63,6 +78,8 @@ class OutputManager:
             metadata=metadata,
             processed_sketch_path=processed_sketch_path,
         )
+        artifacts["style.json"] = style_path
+        
         finalized_report = OutputManager.finalize_validation_report(output_dir, validation_report)
         artifacts["validation_report.json"] = OutputManager.save_validation_report(
             output_dir,
@@ -84,6 +101,7 @@ class OutputManager:
             "brief_path": artifacts["brief.json"],
             "metadata_path": output_dir / "generation_response.json",
             "validation_path": artifacts["validation_report.json"],
+            "style_path": style_path,
         }
 
     @staticmethod

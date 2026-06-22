@@ -48,6 +48,12 @@ class GenerationMetadata(BaseModel):
         description="Artifact file paths"
     )
     
+    # Style information
+    style_name: Optional[str] = Field(None, description="Name of user style used")
+    style_description: Optional[str] = Field(None, description="Description of user style used")
+    style_prompt_additions: Optional[str] = Field(None, description="Style prompt additions used")
+    style_negative_additions: Optional[str] = Field(None, description="Style negative additions used")
+    
     class Config:
         json_encoders = {
             datetime: lambda v: v.isoformat()

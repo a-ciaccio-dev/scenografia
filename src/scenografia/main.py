@@ -52,13 +52,21 @@ def generate(
     resolved_orientation = _resolve_orientation(orientation)
 
     if prompt:
+        style_name = style if style else "Default"
         service = TextGenerationService()
-        result = service.run_text_generation(
-            prompt=prompt,
-            mode=mode,
-            orientation=resolved_orientation,
-            model=model,
-        )
+        
+        import inspect
+        sig = inspect.signature(service.run_text_generation)
+        kwargs = {
+            "prompt": prompt,
+            "mode": mode,
+            "orientation": resolved_orientation,
+            "model": model,
+        }
+        if "style" in sig.parameters:
+            kwargs["style"] = style_name
+            
+        result = service.run_text_generation(**kwargs)
         output_dir = Path(result["output_dir"]).as_posix()
         typer.echo(f"Generated scenic design in {output_dir}")
         return
@@ -67,15 +75,33 @@ def generate(
         typer.echo("Style guidance is required when using --sketch.")
         raise typer.Exit(code=2)
 
+    from scenografia.styles.loader import load_style_by_name, load_styles
+    known_styles = [s.get("name", "").lower() for s in load_styles()]
+    
+    if style.strip().lower() in known_styles:
+        style_name = style.strip()
+        style_obj = load_style_by_name(style_name)
+        style_guidance = style_obj.get("description", style_name)
+    else:
+        style_name = "Default"
+        style_guidance = style
+
     service = SketchGenerationService()
-    result = service.run_sketch_generation(
-        sketch_path=sketch,
-        style=style,
-        mode=mode,
-        orientation=resolved_orientation,
-        model=model,
-        disable_ai_refinement=disable_ai_refinement,
-    )
+    
+    import inspect
+    sig = inspect.signature(service.run_sketch_generation)
+    kwargs = {
+        "sketch_path": sketch,
+        "style": style_guidance,
+        "mode": mode,
+        "orientation": resolved_orientation,
+        "model": model,
+        "disable_ai_refinement": disable_ai_refinement,
+    }
+    if "style_name" in sig.parameters:
+        kwargs["style_name"] = style_name
+        
+    result = service.run_sketch_generation(**kwargs)
     output_dir = Path(result["output_dir"]).as_posix()
     processed_sketch = Path(result["processed_sketch_path"]).as_posix()
     typer.echo(f"Generated scenic design in {output_dir}")

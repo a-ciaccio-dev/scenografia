@@ -35,6 +35,7 @@ class BriefAgent:
             ],
             "input_source": "text",
             "style_guidance": request.style_guidance,
+            "selected_style": getattr(request, "selected_style", "Default"),
         }
 
     def create_from_sketch(
@@ -80,4 +81,5 @@ class BriefAgent:
             "style_guidance": style_guidance,
             "processed_sketch_path": interpretation.processed_sketch_path,
             "refinement_applied": interpretation.refinement_applied,
+            "selected_style": getattr(request, "selected_style", "Default"),
         }

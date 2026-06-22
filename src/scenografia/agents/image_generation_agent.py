@@ -70,6 +70,7 @@ class TextGenerationService:
         mode: GenerationMode | str,
         orientation: Orientation,
         model: str | None,
+        style: str | None = "Default",
     ) -> dict:
         """Execute the text-mode generation pipeline end to end."""
         normalized_mode = mode if isinstance(mode, GenerationMode) else GenerationMode(mode)
@@ -79,6 +80,7 @@ class TextGenerationService:
             mode=normalized_mode,
             orientation=orientation,
             model_id=model,
+            selected_style=style or "Default",
         )
         brief = self.brief_agent.create_from_text(request)
         prompt_package = self.prompt_engineer.build_prompt_package(brief)
@@ -146,6 +148,7 @@ class SketchGenerationService:
         orientation: Orientation,
         model: str | None,
         disable_ai_refinement: bool,
+        style_name: str | None = "Default",
     ) -> dict:
         """Execute the sketch-mode generation pipeline end to end."""
         normalized_mode = mode if isinstance(mode, GenerationMode) else GenerationMode(mode)
@@ -157,6 +160,7 @@ class SketchGenerationService:
             orientation=orientation,
             model_id=model,
             refine_sketch=not disable_ai_refinement,
+            selected_style=style_name or "Default",
         )
         output_dir = OutputManager.create_output_directory(Path(sketch_path).stem)
         interpretation = self.sketch_interpreter.interpret(request, output_dir)
