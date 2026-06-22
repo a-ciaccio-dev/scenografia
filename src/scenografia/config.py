@@ -28,7 +28,7 @@ def load_environment() -> None:
 class Config:
     """Application configuration."""
     
-    # OpenRouter configuration
+    # OpenRouter image generation API configuration
     OPENROUTER_API_KEY: str
     OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1"
     
@@ -119,14 +119,14 @@ class Config:
         if configured:
             return configured
         
-        # Fallback defaults (placeholder - should be replaced with actual model IDs)
+        # Fallback defaults - OpenRouter image-capable models
         fallbacks = {
-            GenerationMode.DRAFT: "meta-llama/llama-2-70b",
-            GenerationMode.STANDARD: "meta-llama/llama-2-70b",
-            GenerationMode.PRODUCTION: "meta-llama/llama-2-70b",
-            GenerationMode.VECTOR_READY: "meta-llama/llama-2-70b",
+            GenerationMode.DRAFT: "google/gemini-2.5-flash-image",
+            GenerationMode.STANDARD: "google/gemini-2.5-flash-image",
+            GenerationMode.PRODUCTION: "google/gemini-2.5-flash-image",
+            GenerationMode.VECTOR_READY: "google/gemini-2.5-flash-image",
         }
-        return fallbacks.get(mode, "meta-llama/llama-2-70b")
+        return fallbacks.get(mode, fallbacks[GenerationMode.STANDARD])
     
     @classmethod
     def validate(cls) -> bool:

@@ -1,13 +1,13 @@
 """
-OpenRouter HTTP client and provider adapter for image generation.
+OpenRouter HTTP client for image generation via chat/completions.
 
-Handles communication with OpenRouter API, request/response mapping,
-and orientation-aware image configuration.
+Handles communication with OpenRouter API for image generation,
+request/response mapping, and orientation-aware image configuration.
 """
 
 import httpx
+import base64
 from typing import Optional, Dict, Any
-import asyncio
 from ..schemas.generation_schema import (
     ImageGenerationResponse,
     Orientation,
@@ -17,15 +17,15 @@ from ..config import Config
 
 
 class OpenRouterClient:
-    """HTTP client for OpenRouter image generation API."""
+    """HTTP client for OpenRouter image generation via chat/completions."""
     
     def __init__(self, api_key: Optional[str] = None, base_url: Optional[str] = None):
         """
-        Initialize OpenRouter client.
+        Initialize image generation client.
         
         Args:
-            api_key: OpenRouter API key (uses Config if not provided)
-            base_url: OpenRouter base URL (uses Config if not provided)
+            api_key: API key (uses Config if not provided)
+            base_url: API base URL (uses Config if not provided)
         """
         self.api_key = api_key or Config.OPENROUTER_API_KEY
         self.base_url = (base_url or Config.OPENROUTER_BASE_URL).rstrip("/")
@@ -33,7 +33,8 @@ class OpenRouterClient:
             headers={
                 "Authorization": f"Bearer {self.api_key}",
                 "Content-Type": "application/json"
-            }
+            },
+            timeout=300.0
         )
     
     def close(self):
@@ -52,77 +53,125 @@ class OpenRouterClient:
         self,
         prompt: str,
         negative_prompt: str = "",
-        model_id: str = "meta-llama/llama-2-70b",
+        model_id: str = "google/gemini-2.5-flash-image",
         orientation: Orientation = Orientation.LANDSCAPE
     ) -> ImageGenerationResponse:
         """
-        Generate an image using OpenRouter.
+        Generate an image using OpenRouter chat/completions with modalities.
         
         Args:
             prompt: Main generation prompt
             negative_prompt: Negative constraints
-            model_id: Model to use
+            model_id: OpenRouter model ID (must support image output modality)
             orientation: Output orientation
             
         Returns:
             ImageGenerationResponse with result
         """
         try:
-            # Build request payload
+            # Map orientation to aspect ratio
+            aspect_ratio = self._map_orientation_to_aspect_ratio(orientation)
+            
+            # Build request payload for OpenRouter chat/completions
             payload = {
                 "model": model_id,
-                "prompt": prompt,
                 "messages": [
                     {
                         "role": "user",
-                        "content": [
-                            {
-                                "type": "text",
-                                "text": prompt
-                            }
-                        ]
+                        "content": prompt
                     }
-                ]
+                ],
+                "modalities": ["image", "text"],
+                "image_config": {
+                    "aspect_ratio": aspect_ratio
+                },
+                "stream": False
             }
             
-            # Add negative prompt if provided
-            if negative_prompt:
-                # Many models don't support negative_prompt, but include it if possible
-                payload["negative_prompt"] = negative_prompt
-            
-            # Map orientation to provider-specific configuration
-            image_config = self._map_orientation_to_config(orientation)
-            payload.update(image_config)
-            
-            # Make request
+            # Make request to chat/completions endpoint
             response = self.client.post(
-                f"{self.base_url}/images/generations",
+                f"{self.base_url}/chat/completions",
                 json=payload,
                 timeout=60.0
             )
             
+            # Handle HTTP errors
             if response.status_code != 200:
+                # Sanitize error message (remove API key)
+                error_text = response.text[:500]  # Limit error text length
                 return ImageGenerationResponse(
-                    error=f"API error: {response.status_code} - {response.text}",
+                    error=f"API error: {response.status_code}",
                     model_used=model_id,
                     request_id="unknown"
                 )
             
             data = response.json()
             
-            # Extract image from response
-            image_url = None
-            image_data = None
-            
-            if "data" in data and len(data["data"]) > 0:
-                image_url = data["data"][0].get("url")
-            
-            return ImageGenerationResponse(
-                image_url=image_url,
-                image_data=image_data,
-                model_used=model_id,
-                request_id=data.get("id", "unknown")
-            )
+            # Parse response: choices[0].message.images[0].image_url.url
+            try:
+                message = data["choices"][0]["message"]
+                images = message.get("images", [])
+                
+                if not images:
+                    return ImageGenerationResponse(
+                        error="No images in response",
+                        model_used=model_id,
+                        request_id="unknown"
+                    )
+                
+                image_url_data = images[0].get("image_url", {})
+                image_url = image_url_data.get("url", "")
+                
+                if not image_url:
+                    return ImageGenerationResponse(
+                        error="Empty image URL in response",
+                        model_used=model_id,
+                        request_id="unknown"
+                    )
+                
+                # Handle base64 data URL or remote URL
+                image_data = None
+                if image_url.startswith("data:image/"):
+                    # Decode base64 data URL
+                    image_data = self._decode_base64_data_url(image_url)
+                    if not image_data:
+                        return ImageGenerationResponse(
+                            error="Failed to decode base64 image data",
+                            model_used=model_id,
+                            request_id="unknown"
+                        )
+                elif image_url.startswith("http"):
+                    # Download remote image
+                    image_data = self._download_image_from_url(image_url)
+                    if not image_data:
+                        return ImageGenerationResponse(
+                            error="Remote image URL download failed",
+                            model_used=model_id,
+                            request_id="unknown"
+                        )
+                else:
+                    return ImageGenerationResponse(
+                        error=f"Unsupported image URL format",
+                        model_used=model_id,
+                        request_id="unknown"
+                    )
+                
+                # Get request ID from response if available
+                request_id = data.get("id", "unknown")
+                
+                return ImageGenerationResponse(
+                    image_url=image_url,
+                    image_data=image_data,
+                    model_used=model_id,
+                    request_id=request_id
+                )
+                
+            except (KeyError, IndexError, TypeError) as e:
+                return ImageGenerationResponse(
+                    error=f"Failed to parse response structure",
+                    model_used=model_id,
+                    request_id="unknown"
+                )
             
         except httpx.RequestError as e:
             return ImageGenerationResponse(
@@ -138,30 +187,83 @@ class OpenRouterClient:
             )
     
     @staticmethod
-    def _map_orientation_to_config(orientation: Orientation) -> Dict[str, Any]:
+    def _map_orientation_to_aspect_ratio(orientation: Orientation) -> str:
         """
-        Map orientation to provider-specific image configuration.
+        Map orientation to aspect ratio string for OpenRouter image_config.
         
         Args:
             orientation: Target orientation
             
         Returns:
-            Configuration dict for the API request
+            Aspect ratio string (e.g., "16:9")
         """
-        # OpenRouter uses width x height for aspect ratio
-        # Common sizes:
-        aspect_ratios = {
-            Orientation.PORTRAIT: {"width": 768, "height": 1024},
-            Orientation.LANDSCAPE: {"width": 1024, "height": 768},
-            Orientation.SQUARE: {"width": 1024, "height": 1024},
+        mapping = {
+            Orientation.PORTRAIT: "9:16",
+            Orientation.LANDSCAPE: "16:9",
+            Orientation.SQUARE: "1:1",
         }
+        return mapping.get(orientation, "16:9")
+    
+    @staticmethod
+    def _map_orientation_to_config(orientation: Orientation) -> Dict[str, str]:
+        """
+        Map orientation to image_config dict format.
+        Used for compatibility with tests and ProviderAdapter.
         
-        config = aspect_ratios.get(orientation, {"width": 1024, "height": 768})
-        return config
+        Args:
+            orientation: Target orientation
+            
+        Returns:
+            Config dict with aspect_ratio
+        """
+        aspect_ratio = OpenRouterClient._map_orientation_to_aspect_ratio(orientation)
+        return {"aspect_ratio": aspect_ratio}
+    
+    @staticmethod
+    def _decode_base64_data_url(data_url: str) -> Optional[bytes]:
+        """
+        Decode a base64 data URL to image bytes.
+        
+        Args:
+            data_url: Data URL string (e.g., "data:image/png;base64,ABC...")
+            
+        Returns:
+            Image bytes or None if decode fails
+        """
+        try:
+            # Extract base64 part after the comma
+            if "," not in data_url:
+                return None
+            
+            base64_part = data_url.split(",", 1)[1]
+            # Decode base64 to bytes
+            image_bytes = base64.b64decode(base64_part)
+            return image_bytes
+        except Exception as e:
+            return None
+    
+    def _download_image_from_url(self, url: str) -> Optional[bytes]:
+        """
+        Download image from remote URL.
+        
+        Args:
+            url: Remote image URL
+            
+        Returns:
+            Image bytes or None if download fails
+        """
+        try:
+            response = self.client.get(url, timeout=30.0)
+            if response.status_code == 200:
+                return response.content
+            return None
+        except Exception as e:
+            return None
     
     def fetch_image_from_url(self, url: str) -> Optional[bytes]:
         """
-        Fetch image data from URL.
+        Fetch image data from URL (legacy method name for compatibility).
+        Delegates to _download_image_from_url.
         
         Args:
             url: Image URL
@@ -169,21 +271,15 @@ class OpenRouterClient:
         Returns:
             Image bytes or None if fetch fails
         """
-        try:
-            response = self.client.get(url, timeout=30.0)
-            if response.status_code == 200:
-                return response.content
-        except Exception as e:
-            print(f"Error fetching image: {e}")
-        
-        return None
+        return self._download_image_from_url(url)
 
 
 class ProviderAdapter:
     """
     Adapter for provider-specific image generation configuration.
     
-    Translates generation parameters to provider-specific formats.
+    Translates generation parameters to OpenRouter chat/completions format.
+    Note: Only used by tests, not in the main generation path.
     """
     
     @staticmethod
@@ -195,62 +291,35 @@ class ProviderAdapter:
         generation_mode: GenerationMode = GenerationMode.STANDARD
     ) -> Dict[str, Any]:
         """
-        Build a complete image generation request for the provider.
+        Build a complete image generation request for OpenRouter chat/completions.
         
         Args:
             prompt: Main prompt
             negative_prompt: Negative constraints
-            model_id: Model ID
+            model_id: OpenRouter model ID
             orientation: Output orientation
-            generation_mode: Generation mode
+            generation_mode: Generation mode (for future use)
             
         Returns:
-            Complete request dictionary
+            Complete request dictionary in chat/completions format
         """
-        # Base request
+        # Map orientation to aspect ratio
+        aspect_ratio = OpenRouterClient._map_orientation_to_aspect_ratio(orientation)
+        
+        # Build OpenRouter chat/completions format request
         request = {
             "model": model_id,
-            "prompt": prompt,
-            "negative_prompt": negative_prompt,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            "modalities": ["image", "text"],
+            "image_config": {
+                "aspect_ratio": aspect_ratio
+            },
+            "stream": False
         }
-        
-        # Add orientation-specific configuration
-        aspect_config = OpenRouterClient._map_orientation_to_config(orientation)
-        request.update(aspect_config)
-        
-        # Add mode-specific quality settings
-        quality_settings = ProviderAdapter._get_quality_settings(generation_mode)
-        request.update(quality_settings)
         
         return request
-    
-    @staticmethod
-    def _get_quality_settings(mode: GenerationMode) -> Dict[str, Any]:
-        """
-        Get quality/speed settings based on generation mode.
-        
-        Args:
-            mode: Generation mode
-            
-        Returns:
-            Quality settings dict
-        """
-        settings = {
-            GenerationMode.DRAFT: {
-                "num_inference_steps": 20,
-                "guidance_scale": 7.5,
-            },
-            GenerationMode.STANDARD: {
-                "num_inference_steps": 30,
-                "guidance_scale": 8.0,
-            },
-            GenerationMode.PRODUCTION: {
-                "num_inference_steps": 50,
-                "guidance_scale": 8.5,
-            },
-            GenerationMode.VECTOR_READY: {
-                "num_inference_steps": 40,
-                "guidance_scale": 9.0,
-            },
-        }
-        return settings.get(mode, settings[GenerationMode.STANDARD])

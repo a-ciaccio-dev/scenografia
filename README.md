@@ -1,6 +1,6 @@
 # Scenografia: AI Theatrical Scenic Design CLI
 
-Scenografia is a Python 3.11+ command-line tool for generating theatrical scenic artwork from text prompts or black-and-white sketches. It is designed around reproducible output folders, configurable OpenRouter model mappings, orientation-aware generation, and validation artifacts that make each run inspectable after the fact.
+Scenografia is a Python 3.11+ command-line tool for generating theatrical scenic artwork from text prompts or black-and-white sketches. It is designed around reproducible output folders, configurable image generation model mappings, orientation-aware generation, and validation artifacts that make each run inspectable after the fact.
 
 ## Purpose
 
@@ -10,7 +10,10 @@ The project focuses on theatrical scenic design rather than generic image genera
 
 - Python 3.11 or newer
 - A local `.venv` in the repository root
-- OpenRouter credentials in a local `.env` file for live generation commands
+- **OpenRouter API credentials** in a local `.env` file for live generation commands
+  - Get a free account at [openrouter.ai](https://openrouter.ai)
+  - Generate an API key from your account settings
+  - Note: You must have a model with `output_modalities=image` enabled for your account
 - No hardcoded secrets in source, tests, or documentation
 
 ## Setup
@@ -45,27 +48,36 @@ copy .env.example .env
 Required live-generation setting:
 
 ```env
-OPENROUTER_API_KEY=your-local-openrouter-key
+OPENROUTER_API_KEY=your-openrouter-api-key
 ```
 
 Optional configuration:
 
 ```env
 OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
-OPENROUTER_DRAFT_MODEL=your/draft-model
-OPENROUTER_STANDARD_MODEL=your/standard-model
-OPENROUTER_PRODUCTION_MODEL=your/production-model
-OPENROUTER_VECTOR_READY_MODEL=your/vector-ready-model
+OPENROUTER_DRAFT_MODEL=google/gemini-2.5-flash-image
+OPENROUTER_STANDARD_MODEL=google/gemini-2.5-flash-image
+OPENROUTER_PRODUCTION_MODEL=google/gemini-2.5-flash-image
+OPENROUTER_VECTOR_READY_MODEL=google/gemini-2.5-flash-image
 APP_INPUT_DIR=input
 APP_OUTPUT_DIR=output
 APP_DEBUG=false
 ```
 
-`OPENROUTER_API_KEY` is required only for real OpenRouter generation calls. The automated test suite does not require real credentials.
+`OPENROUTER_API_KEY` (your OpenRouter API key) is required only for real image generation calls. The automated test suite does not require real credentials.
 
-## OpenRouter Configuration
+### Model Configuration
 
-Model IDs remain configurable through `.env` so no exact Nano Banana or other provider model identifier is hardcoded in the application. The `models` command prints only per-mode model IDs or a safe configuration message. It does not print `OPENROUTER_API_KEY` or any secret value.
+Model IDs must be OpenRouter model identifiers with `output_modalities=image` support.
+
+**Recommended starter model**:
+- **Google Gemini 2.5 Flash Image**: `google/gemini-2.5-flash-image` (good balance of quality and speed)
+
+**Other options** (verify image output support on your OpenRouter account):
+- Any OpenRouter model with `output_modalities=image` enabled
+- You can find available models at [openrouter.ai/models](https://openrouter.ai/models)
+
+**Important**: The model must explicitly support image output. If a model does not support `output_modalities=image`, generation will fail.
 
 ## Usage
 
@@ -78,18 +90,34 @@ Supported orientation values are:
 ### Text prompt generation
 
 ```bash
+# Via python -m scenografia
 python -m scenografia generate --prompt "fairytale medieval village with a castle in the background" --mode standard --orientation landscape
+
+# Or via python -m scenografia.main
+python -m scenografia.main generate --prompt "fairytale medieval village with a castle in the background" --mode standard --orientation landscape
 ```
 
 ### Sketch generation
 
 ```bash
+# Via python -m scenografia
 python -m scenografia generate --sketch input/sketches/sketch.png --style "fairytale theatrical backdrop" --mode vector-ready --orientation portrait
+
+# Or via python -m scenografia.main
+python -m scenografia.main generate --sketch input/sketches/sketch.png --style "fairytale theatrical backdrop" --mode vector-ready --orientation portrait
 ```
 
 ### Validate a generated image
 
 ```bash
+python -m scenografia.main validate --image output/example/final.png
+```
+
+### Validate a completed run folder
+
+```bash
+python -m scenografia.main validate --run output/2026-06-21_2000_example-scene
+```
 python -m scenografia validate --image output/example/final.png
 ```
 
