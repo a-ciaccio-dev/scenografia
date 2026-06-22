@@ -133,6 +133,42 @@ python -m scenografia validate --run output/2026-06-21_2000_example-scene
 python -m scenografia models
 ```
 
+## Web Interface
+
+Scenografia includes a local web UI built with Streamlit for browser-based access.
+
+### Setup
+
+Install web dependencies:
+
+```bash
+pip install -e ".[web]"
+```
+
+### Run Web Interface
+
+```bash
+streamlit run src/scenografia/web_app.py
+```
+
+The browser will open at `http://localhost:8501`.
+
+### Features
+
+- **Text-to-Image Generation**: Enter a scenic prompt and generate designs
+- **Sketch-to-Image Workflow**: Upload a sketch, add style guidance, refine the result
+- **Configuration Sidebar**: Select generation mode and output orientation
+- **Results Viewer**: See generated image, final prompt, and validation report
+- **Gallery**: Browse recent generation runs with thumbnails
+
+### Requirements
+
+The web interface requires the same `OPENROUTER_API_KEY` in `.env` as the CLI.
+
+### Note
+
+The CLI (`python -m scenografia generate ...`) remains fully functional and is the recommended interface for automation. The web interface and CLI share the same underlying pipeline, agents, and output artifacts.
+
 ## Commands
 
 ### `generate`

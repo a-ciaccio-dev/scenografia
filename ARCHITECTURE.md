@@ -7,7 +7,7 @@ This document provides a comprehensive overview of the Scenografia project for A
 ### High-Level Flow
 
 ```
-User Input (CLI)
+User Input (CLI or Web UI)
   ↓
 [Orientation Validation] ← Required before generation
   ↓
@@ -23,6 +23,13 @@ User Input (CLI)
   ↓
 [OutputManager] → Persist artifacts in timestamped folder
 ```
+
+### Entry Points
+
+- **CLI** (`src/scenografia/main.py`): Command-line interface using Typer for automated workflows and scripting
+- **Web UI** (`src/scenografia/web_app.py`): Streamlit local web interface for interactive generation (optional dependency)
+
+Both entry points orchestrate the same pipeline agents and services, ensuring consistent results.
 
 ### Core Components
 
