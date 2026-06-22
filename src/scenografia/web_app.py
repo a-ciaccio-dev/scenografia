@@ -7,6 +7,18 @@ or sketches. Reuses the existing pipeline agents and services.
 
 from pathlib import Path
 from typing import Optional
+import logging
+
+# Configure logging to console and a local log file
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler("scenografia_app.log", encoding="utf-8")
+    ]
+)
+logger = logging.getLogger("scenografia_web")
 
 
 def load_config() -> tuple[bool, str]:
@@ -20,15 +32,16 @@ def load_config() -> tuple[bool, str]:
     try:
         from scenografia.config import Config
         Config.initialize()
+        logger.info("Configurazione caricata con successo.")
         return (True, "")
     except KeyError as e:
-        # Missing environment variable
+        logger.error(f"Errore caricamento configurazione (KeyError): {str(e)}")
         return (False, "Configura OPENROUTER_API_KEY nel file .env")
     except ValueError as e:
-        # Invalid configuration
+        logger.error(f"Errore caricamento configurazione (ValueError): {str(e)}")
         return (False, f"Errore di configurazione: {str(e)}")
     except Exception as e:
-        # Generic error, sanitized
+        logger.error(f"Errore caricamento configurazione (Generico): {str(e)}")
         return (False, "Errore nell'inizializzazione: verifica il file .env e le credenziali")
 
 
@@ -53,14 +66,21 @@ def run_text_generation(
     from scenografia.agents.image_generation_agent import TextGenerationService
     from scenografia.schemas.generation_schema import GenerationMode, Orientation
     
+    logger.info(f"Avvio text generation. Prompt: '{prompt}' | Mode: {mode} | Orientation: {orientation} | Style: {style}")
     service = TextGenerationService()
-    return service.run_text_generation(
-        prompt=prompt,
-        mode=GenerationMode(mode),
-        orientation=Orientation(orientation),
-        model=model,
-        style=style,
-    )
+    try:
+        result = service.run_text_generation(
+            prompt=prompt,
+            mode=GenerationMode(mode),
+            orientation=Orientation(orientation),
+            model=model,
+            style=style,
+        )
+        logger.info(f"Text generation completata con successo. Risultati in: {result.get('output_dir')}")
+        return result
+    except Exception as e:
+        logger.error(f"Errore durante run_text_generation: {str(e)}", exc_info=True)
+        raise e
 
 
 def run_sketch_generation(
@@ -85,16 +105,23 @@ def run_sketch_generation(
     from scenografia.agents.image_generation_agent import SketchGenerationService
     from scenografia.schemas.generation_schema import GenerationMode, Orientation
     
+    logger.info(f"Avvio sketch generation. Sketch: {sketch_path} | Guidance: '{style}' | Mode: {mode} | Orientation: {orientation} | Style Name: {style_name}")
     service = SketchGenerationService()
-    return service.run_sketch_generation(
-        sketch_path=sketch_path,
-        style=style,
-        mode=GenerationMode(mode),
-        orientation=Orientation(orientation),
-        model=model,
-        disable_ai_refinement=False,
-        style_name=style_name,
-    )
+    try:
+        result = service.run_sketch_generation(
+            sketch_path=sketch_path,
+            style=style,
+            mode=GenerationMode(mode),
+            orientation=Orientation(orientation),
+            model=model,
+            disable_ai_refinement=False,
+            style_name=style_name,
+        )
+        logger.info(f"Sketch generation completata con successo. Risultati in: {result.get('output_dir')}")
+        return result
+    except Exception as e:
+        logger.error(f"Errore durante run_sketch_generation: {str(e)}", exc_info=True)
+        raise e
 
 
 def display_generation_results(

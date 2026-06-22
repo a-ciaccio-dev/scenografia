@@ -144,7 +144,7 @@ def read_prompt_file(prompt_path_or_dir: str | Path) -> Optional[str]:
     # If it's a file and is named prompt.txt, use it directly
     if path.is_file() and path.name == "prompt.txt":
         try:
-            return path.read_text()
+            return path.read_text(encoding="utf-8")
         except IOError:
             return None
     
@@ -155,7 +155,7 @@ def read_prompt_file(prompt_path_or_dir: str | Path) -> Optional[str]:
         return None
     
     try:
-        return prompt_path.read_text()
+        return prompt_path.read_text(encoding="utf-8")
     except IOError:
         return None
 
