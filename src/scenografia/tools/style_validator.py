@@ -151,7 +151,7 @@ class StyleValidator:
         try:
             # Check metadata
             if metadata_path.exists():
-                with open(metadata_path) as f:
+                with open(metadata_path, encoding="utf-8") as f:
                     metadata = json.load(f)
                     if "orientation" not in metadata:
                         issues.append("Orientation missing from metadata")
@@ -160,7 +160,7 @@ class StyleValidator:
             
             # Check validation report
             if validation_report_path.exists():
-                with open(validation_report_path) as f:
+                with open(validation_report_path, encoding="utf-8") as f:
                     report = json.load(f)
                     if "orientation" not in report:
                         issues.append("Orientation missing from validation report")

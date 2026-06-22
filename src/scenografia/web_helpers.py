@@ -91,7 +91,7 @@ def read_validation_report(run_dir: str | Path) -> Optional[dict[str, Any]]:
         return None
     
     try:
-        with open(report_path, "r") as f:
+        with open(report_path, "r", encoding="utf-8") as f:
             return json.load(f)
     except (json.JSONDecodeError, IOError):
         return None
