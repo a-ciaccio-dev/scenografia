@@ -157,7 +157,7 @@ def display_generation_results(
         if image_path:
             image_path_obj = Path(image_path)
             if image_path_obj.exists():
-                st.image(str(image_path_obj), use_column_width=True)
+                st.image(str(image_path_obj), use_container_width=True)
                 with open(image_path_obj, "rb") as f:
                     st.download_button(
                         label="⬇️ Scarica immagine",
@@ -176,7 +176,7 @@ def display_generation_results(
             if sketch_path_obj.exists():
                 st.markdown("---")
                 st.markdown("#### Sketch processato")
-                st.image(str(sketch_path_obj), use_column_width=False, width=300)
+                st.image(str(sketch_path_obj), use_container_width=False, width=300)
     
     # Prompt tab
     with result_tab_prompt:
