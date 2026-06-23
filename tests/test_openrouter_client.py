@@ -334,3 +334,66 @@ class TestClientErrorHandling:
         assert response.error is not None
         assert "Request failed" in response.error
         assert "test-key" not in response.error  # API key must not be exposed
+
+
+class TestImageToImageGeneration:
+    """Test image-to-image multimodal generation requests."""
+    
+    @patch('scenografia.tools.openrouter_client.httpx.Client')
+    def test_generate_image_with_input_image_bytes(self, mock_client_class):
+        """Should format request with multimodal message contents when input_image_bytes are provided."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "id": "gen-img2img",
+            "choices": [
+                {
+                    "message": {
+                        "images": [
+                            {
+                                "image_url": {
+                                    "url": "data:image/png;base64,ZmFrZS1pbWFnZQ=="
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+        
+        mock_client = MagicMock()
+        mock_client.post.return_value = mock_response
+        mock_client_class.return_value = mock_client
+        
+        client = OpenRouterClient(api_key="test-key")
+        client.client = mock_client
+        
+        fake_input_image = b"previous-image-data"
+        
+        response = client.generate_image(
+            prompt="Add a steampunk window",
+            model_id="google/gemini-2.5-flash-image",
+            orientation=Orientation.LANDSCAPE,
+            input_image_bytes=fake_input_image
+        )
+        
+        assert response.error is None
+        assert response.request_id == "gen-img2img"
+        
+        # Verify the payload structure
+        mock_client.post.assert_called_once()
+        _, kwargs = mock_client.post.call_args
+        json_payload = kwargs["json"]
+        
+        # Messages content should be a list
+        messages = json_payload["messages"]
+        assert len(messages) == 1
+        content = messages[0]["content"]
+        assert isinstance(content, list)
+        assert len(content) == 2
+        
+        # One text block and one image_url block
+        assert content[0]["type"] == "text"
+        assert "steampunk" in content[0]["text"]
+        assert content[1]["type"] == "image_url"
+        assert content[1]["image_url"]["url"].startswith("data:image/png;base64,")

@@ -46,7 +46,7 @@ def load_config() -> tuple[bool, str]:
 
 
 def run_text_generation(
-    prompt: str, mode: str, orientation: str, model: Optional[str] = None, style: Optional[str] = "Default", progress_callback: Optional[callable] = None
+    prompt: str, mode: str, orientation: str, model: Optional[str] = None, style: Optional[str] = "Default", progress_callback: Optional[callable] = None, input_image_bytes: Optional[bytes] = None
 ) -> dict:
     """
     Wrapper for TextGenerationService.run_text_generation().
@@ -60,6 +60,7 @@ def run_text_generation(
         model: Optional model override
         style: Optional style name
         progress_callback: Optional progress callback function
+        input_image_bytes: Optional bytes of previous image for image-to-image
         
     Returns:
         Result dict with output_dir, image_path, prompt_path, etc.
@@ -77,6 +78,7 @@ def run_text_generation(
             model=model,
             style=style,
             progress_callback=progress_callback,
+            input_image_bytes=input_image_bytes,
         )
         logger.info(f"Text generation completata con successo. Risultati in: {result.get('output_dir')}")
         return result
@@ -86,7 +88,7 @@ def run_text_generation(
 
 
 def run_sketch_generation(
-    sketch_path: str, style: str, mode: str, orientation: str, model: Optional[str] = None, style_name: Optional[str] = "Default", progress_callback: Optional[callable] = None
+    sketch_path: str, style: str, mode: str, orientation: str, model: Optional[str] = None, style_name: Optional[str] = "Default", progress_callback: Optional[callable] = None, input_image_bytes: Optional[bytes] = None
 ) -> dict:
     """
     Wrapper for SketchGenerationService.run_sketch_generation().
@@ -101,6 +103,7 @@ def run_sketch_generation(
         model: Optional model override
         style_name: Selected user style name
         progress_callback: Optional progress callback function
+        input_image_bytes: Optional bytes of previous image for image-to-image
         
     Returns:
         Result dict with output_dir, image_path, processed_sketch_path, etc.
@@ -120,6 +123,7 @@ def run_sketch_generation(
             disable_ai_refinement=False,
             style_name=style_name,
             progress_callback=progress_callback,
+            input_image_bytes=input_image_bytes,
         )
         logger.info(f"Sketch generation completata con successo. Risultati in: {result.get('output_dir')}")
         return result
@@ -162,13 +166,96 @@ def display_generation_results(
             image_path_obj = Path(image_path)
             if image_path_obj.exists():
                 st.image(str(image_path_obj), use_container_width=True)
-                with open(image_path_obj, "rb") as f:
-                    st.download_button(
-                        label="⬇️ Scarica immagine",
-                        data=f.read(),
-                        file_name=image_path_obj.name,
-                        mime="image/png"
+                
+                # Load metadata
+                import json
+                used_mode = "standard"
+                original_prompt = ""
+                orientation_val = "landscape"
+                input_type = "text"
+                selected_style = "Default"
+                
+                metadata_path = Path(output_dir) / "generation_response.json"
+                if metadata_path.exists():
+                    try:
+                        with open(metadata_path, "r", encoding="utf-8") as f:
+                            meta_data = json.load(f)
+                            used_mode = meta_data.get("generation_mode", "standard")
+                            original_prompt = meta_data.get("original_prompt", "")
+                            raw_orientation = meta_data.get("orientation", "landscape")
+                            orientation_val = raw_orientation.value if hasattr(raw_orientation, "value") else str(raw_orientation)
+                            input_type = meta_data.get("input_type", "text")
+                            selected_style = meta_data.get("style_name", "Default")
+                    except Exception:
+                        pass
+                
+                all_modes = ["draft", "standard", "production", "vector-ready"]
+                other_modes = [m for m in all_modes if m != used_mode]
+                
+                col_dl, col_sel, col_go = st.columns([2, 3, 1])
+                with col_dl:
+                    with open(image_path_obj, "rb") as f:
+                        st.download_button(
+                            label="⬇️ Scarica immagine",
+                            data=f.read(),
+                            file_name=image_path_obj.name,
+                            mime="image/png"
+                        )
+                
+                with col_sel:
+                    selected_new_mode = st.selectbox(
+                        "Rigenera con modalità:",
+                        options=other_modes,
+                        label_visibility="collapsed",
+                        key=f"select_new_mode_{output_dir}"
                     )
+                    
+                with col_go:
+                    go_clicked = st.button("GO", key=f"btn_go_{output_dir}")
+                    
+                if go_clicked:
+                    with st.spinner("Rigenerazione con nuovo modello..."):
+                        try:
+                            # Read current image bytes
+                            with open(image_path_obj, "rb") as img_file:
+                                prev_image_bytes = img_file.read()
+                            
+                            if input_type == "sketch":
+                                run_sketch = sketch_path if sketch_path else str(image_path_obj.parent / "processed_sketch.png")
+                                result = run_sketch_generation(
+                                    sketch_path=str(run_sketch),
+                                    style=original_prompt,
+                                    mode=selected_new_mode,
+                                    orientation=orientation_val,
+                                    model=None,
+                                    style_name=selected_style,
+                                    input_image_bytes=prev_image_bytes
+                                )
+                                st.session_state.active_generation = {
+                                    "output_dir": result.get("output_dir"),
+                                    "image_path": result.get("image_path"),
+                                    "prompt_path": result.get("prompt_path"),
+                                    "sketch_path": result.get("processed_sketch_path")
+                                }
+                            else:
+                                result = run_text_generation(
+                                    prompt=original_prompt,
+                                    mode=selected_new_mode,
+                                    orientation=orientation_val,
+                                    model=None,
+                                    style=selected_style,
+                                    input_image_bytes=prev_image_bytes
+                                )
+                                st.session_state.active_generation = {
+                                    "output_dir": result.get("output_dir"),
+                                    "image_path": result.get("image_path"),
+                                    "prompt_path": result.get("prompt_path"),
+                                    "sketch_path": None
+                                }
+                            st.success("✅ Generazione completata con nuovo modello!")
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"❌ Errore nella rigenerazione: {str(e)}")
             else:
                 st.warning("Immagine finale non trovata")
         else:
@@ -232,6 +319,8 @@ def main():
         st.session_state.prompt_val = ""
     if "enhanced_prompt" not in st.session_state:
         st.session_state.enhanced_prompt = None
+    if "active_generation" not in st.session_state:
+        st.session_state.active_generation = None
 
     # Load user styles
     from scenografia.styles.loader import load_styles, save_style
@@ -309,11 +398,7 @@ def main():
             index=0,
             help="Canvas proportions"
         )
-        model_override = st.text_input(
-            "Model Override (optional)",
-            value="",
-            help="Leave empty to use configured default model"
-        )
+        model_override = None
         
         # User Style Selector
         selected_style_name = st.selectbox(
@@ -467,15 +552,20 @@ def main():
                     image_path = result.get("image_path")
                     prompt_path = result.get("prompt_path")
                     
-                    display_generation_results(
-                        output_dir=output_dir,
-                        image_path=image_path,
-                        prompt_path=prompt_path,
-                        sketch_path=None
-                    )
+                    st.session_state.active_generation = {
+                        "output_dir": output_dir,
+                        "image_path": image_path,
+                        "prompt_path": prompt_path,
+                        "sketch_path": None
+                    }
+                    st.rerun()
                     
                 except Exception as e:
                     st.error(f"❌ Errore nella generazione: {str(e)}")
+                    
+        # Display results if there is active generation for text modality
+        if st.session_state.active_generation and st.session_state.active_generation.get("sketch_path") is None:
+            display_generation_results(**st.session_state.active_generation)
     
     # ========================
     # TAB 2: Sketch Upload
@@ -535,15 +625,20 @@ def main():
                     prompt_path = result.get("prompt_path")
                     processed_sketch_path = result.get("processed_sketch_path")
                     
-                    display_generation_results(
-                        output_dir=output_dir,
-                        image_path=image_path,
-                        prompt_path=prompt_path,
-                        sketch_path=processed_sketch_path
-                    )
+                    st.session_state.active_generation = {
+                        "output_dir": output_dir,
+                        "image_path": image_path,
+                        "prompt_path": prompt_path,
+                        "sketch_path": processed_sketch_path
+                    }
+                    st.rerun()
                     
                 except Exception as e:
                     st.error(f"❌ Errore nella generazione: {str(e)}")
+                    
+        # Display results if there is active generation for sketch modality
+        if st.session_state.active_generation and st.session_state.active_generation.get("sketch_path") is not None:
+            display_generation_results(**st.session_state.active_generation)
     
     # ========================
     # Gallery Grid: Recent Runs

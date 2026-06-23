@@ -54,7 +54,8 @@ class OpenRouterClient:
         prompt: str,
         negative_prompt: str = "",
         model_id: str = "google/gemini-2.5-flash-image",
-        orientation: Orientation = Orientation.LANDSCAPE
+        orientation: Orientation = Orientation.LANDSCAPE,
+        input_image_bytes: Optional[bytes] = None
     ) -> ImageGenerationResponse:
         """
         Generate an image using OpenRouter chat/completions with modalities.
@@ -64,6 +65,7 @@ class OpenRouterClient:
             negative_prompt: Negative constraints
             model_id: OpenRouter model ID (must support image output modality)
             orientation: Output orientation
+            input_image_bytes: Optional bytes of a previous image to base generation on (img2img)
             
         Returns:
             ImageGenerationResponse with result
@@ -72,13 +74,36 @@ class OpenRouterClient:
             # Map orientation to aspect ratio
             aspect_ratio = self._map_orientation_to_aspect_ratio(orientation)
             
+            if input_image_bytes:
+                # Convert bytes to base64 data URL
+                base64_str = base64.b64encode(input_image_bytes).decode("utf-8")
+                refined_prompt = (
+                    f"Use the attached reference image showing the current scenic layout and color palette. "
+                    f"Generate a new theatrical scenic design that copies the composition, arrangement, and color choices "
+                    f"of this reference image, but updates, enhances, or adds details according to this description: {prompt}"
+                )
+                content = [
+                    {
+                        "type": "text",
+                        "text": refined_prompt
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/png;base64,{base64_str}"
+                        }
+                    }
+                ]
+            else:
+                content = prompt
+            
             # Build request payload for OpenRouter chat/completions
             payload = {
                 "model": model_id,
                 "messages": [
                     {
                         "role": "user",
-                        "content": prompt
+                        "content": content
                     }
                 ],
                 "modalities": ["image", "text"],

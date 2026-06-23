@@ -19,7 +19,7 @@ class ImageGenerationAgent:
     def __init__(self, client: OpenRouterClient | None = None):
         self.client = client or OpenRouterClient()
 
-    def generate(self, request: GenerationRequest, prompt_package: dict, brief: dict):
+    def generate(self, request: GenerationRequest, prompt_package: dict, brief: dict, input_image_bytes: bytes | None = None):
         """Send the final prompt package to OpenRouter."""
         model_id = Config.get_model_id(request.mode, request.model_id)
         response = self.client.generate_image(
@@ -27,6 +27,7 @@ class ImageGenerationAgent:
             negative_prompt=prompt_package["negative_prompt"],
             model_id=model_id,
             orientation=request.orientation,
+            input_image_bytes=input_image_bytes,
         )
 
         if response.error:
@@ -72,6 +73,7 @@ class TextGenerationService:
         model: str | None,
         style: str | None = "Default",
         progress_callback: callable = None,
+        input_image_bytes: bytes | None = None,
     ) -> dict:
         """Execute the text-mode generation pipeline end to end."""
         if progress_callback:
@@ -109,7 +111,13 @@ class TextGenerationService:
             try:
                 if progress_callback:
                     progress_callback("generate")
-                response = self._get_image_generator().generate(request, prompt_package, brief)
+                generator = self._get_image_generator()
+                import inspect
+                sig = inspect.signature(generator.generate)
+                if "input_image_bytes" in sig.parameters:
+                    response = generator.generate(request, prompt_package, brief, input_image_bytes=input_image_bytes)
+                else:
+                    response = generator.generate(request, prompt_package, brief)
                 break
             except Exception as e:
                 if attempt == max_attempts - 1:
@@ -186,6 +194,7 @@ class SketchGenerationService:
         disable_ai_refinement: bool,
         style_name: str | None = "Default",
         progress_callback: callable = None,
+        input_image_bytes: bytes | None = None,
     ) -> dict:
         """Execute the sketch-mode generation pipeline end to end."""
         if progress_callback:
@@ -211,11 +220,19 @@ class SketchGenerationService:
         import inspect
         sig = inspect.signature(self._complete_generation)
         if "output_dir" in sig.parameters or "progress_callback" in sig.parameters:
-            return self._complete_generation(request, brief, prompt_package, interpretation, output_dir, progress_callback)
+            return self._complete_generation(
+                request,
+                brief,
+                prompt_package,
+                interpretation,
+                output_dir=output_dir,
+                progress_callback=progress_callback,
+                input_image_bytes=input_image_bytes
+            )
         else:
             return self._complete_generation(request, brief, prompt_package, interpretation)
 
-    def _complete_generation(self, request, brief, prompt_package, interpretation, output_dir=None, progress_callback=None) -> dict:
+    def _complete_generation(self, request, brief, prompt_package, interpretation, output_dir=None, progress_callback=None, input_image_bytes=None) -> dict:
         """Finish provider generation and artifact persistence for sketch mode."""
         # generate -> validate -> refine -> regenerate loop
         from scenografia.tools.style_validator import StyleValidator
@@ -235,7 +252,13 @@ class SketchGenerationService:
             try:
                 if progress_callback:
                     progress_callback("generate")
-                response = self._get_image_generator().generate(request, prompt_package, brief)
+                generator = self._get_image_generator()
+                import inspect
+                sig = inspect.signature(generator.generate)
+                if "input_image_bytes" in sig.parameters:
+                    response = generator.generate(request, prompt_package, brief, input_image_bytes=input_image_bytes)
+                else:
+                    response = generator.generate(request, prompt_package, brief)
                 break
             except Exception as e:
                 if attempt == max_attempts - 1:
