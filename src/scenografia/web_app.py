@@ -46,7 +46,7 @@ def load_config() -> tuple[bool, str]:
 
 
 def run_text_generation(
-    prompt: str, mode: str, orientation: str, model: Optional[str] = None, style: Optional[str] = "Default", progress_callback: Optional[callable] = None, input_image_bytes: Optional[bytes] = None
+    prompt: str, mode: str, orientation: str, model: Optional[str] = None, style: Optional[str] = "Default", progress_callback: Optional[callable] = None, input_image_bytes: Optional[bytes] = None, division: Optional[str] = "Nessuna"
 ) -> dict:
     """
     Wrapper for TextGenerationService.run_text_generation().
@@ -61,6 +61,7 @@ def run_text_generation(
         style: Optional style name
         progress_callback: Optional progress callback function
         input_image_bytes: Optional bytes of previous image for image-to-image
+        division: Optional division type ("Nessuna", "2 parti", "3 parti", "4 parti")
         
     Returns:
         Result dict with output_dir, image_path, prompt_path, etc.
@@ -68,7 +69,19 @@ def run_text_generation(
     from scenografia.agents.image_generation_agent import TextGenerationService
     from scenografia.schemas.generation_schema import GenerationMode, Orientation
     
-    logger.info(f"Avvio text generation. Prompt: '{prompt}' | Mode: {mode} | Orientation: {orientation} | Style: {style}")
+    # Inject scenic division constraint if requested
+    division_instruction = ""
+    if division == "2 parti":
+        division_instruction = "The composition must be visibly divided into 2 symmetrical sections, separated by a vertical element (such as a column, beam, or vertical feature), acting as a visual and structural boundary."
+    elif division == "3 parti":
+        division_instruction = "The composition must be visibly divided into 3 equal vertical panels, separated by vertical elements (such as columns, beams, or vertical features), acting as visual and structural boundaries."
+    elif division == "4 parti":
+        division_instruction = "The composition must be visibly divided into 4 equal vertical panels, separated by vertical elements (such as columns, beams, or vertical features), acting as visual and structural boundaries."
+    
+    if division_instruction:
+        prompt = f"{prompt}\nComposition layout: {division_instruction}"
+        
+    logger.info(f"Avvio text generation. Prompt: '{prompt}' | Mode: {mode} | Orientation: {orientation} | Style: {style} | Division: {division}")
     service = TextGenerationService()
     try:
         result = service.run_text_generation(
@@ -470,6 +483,14 @@ def main():
             help="Scegli lo stile artistico da sovrapporre al core prompt."
         )
 
+        # Scenic Division Selector
+        division = st.selectbox(
+            "Divisione Scenica",
+            options=["Nessuna", "2 parti", "3 parti", "4 parti"],
+            index=0,
+            help="Suddividi il disegno in più pannelli o parti verticali"
+        )
+
         # Read-only BASE_PROMPT display
         from scenografia.tools.prompt_templates import BASE_PROMPT, BASE_NEGATIVE
         with st.expander("Prompt base SVG-safe"):
@@ -531,21 +552,45 @@ def main():
     # Keep session state updated with manual input changes
     st.session_state.prompt_val = prompt
     
-    # AI Prompt Enhancer Action
-    col_enh_1, col_enh_2 = st.columns([1, 1])
-    with col_enh_1:
-        if st.button("✨ Migliora con AI Assistant", key="btn_enhance"):
-            if not prompt.strip():
-                st.warning("⚠️ Inserisci prima una descrizione di base da migliorare.")
-            else:
-                with st.spinner("L'assistente AI sta arricchendo la scena..."):
-                    try:
-                        from scenografia.agents.prompt_enhancer_agent import PromptEnhancerAgent
-                        enhancer = PromptEnhancerAgent()
-                        enhanced = enhancer.enhance_prompt(prompt, model_id=model_override if model_override else None)
-                        st.session_state.enhanced_prompt = enhanced
-                    except Exception as e:
-                        st.error(f"Errore: {str(e)}")
+    # AI Prompt Enhancer Action & Reference Image Uploader
+    col_enh, col_file = st.columns([1, 1])
+    
+    with col_file:
+        ref_image = st.file_uploader(
+            "Carica immagine di riferimento (opzionale)",
+            type=["png", "jpg", "jpeg"],
+            key="reference_image_uploader",
+            help="Un'immagine usata come riferimento per lo stile dell'AI o il layout fisico del disegno finale."
+        )
+        
+    ref_image_bytes = None
+    if ref_image is not None:
+        ref_image_bytes = ref_image.read()
+        
+    with col_enh:
+        use_as_layout = st.checkbox("Usa per il layout (Image-to-Image)", value=True, key="ref_use_layout")
+        use_as_style = st.checkbox("Analizza stile con AI (Vision)", value=True, key="ref_use_style")
+        
+        btn_enhance = st.button("✨ Migliora con AI Assistant", key="btn_enhance")
+
+    if btn_enhance:
+        if not prompt.strip():
+            st.warning("⚠️ Inserisci prima una descrizione di base da migliorare.")
+        else:
+            with st.spinner("L'assistente AI sta arricchendo la scena..."):
+                try:
+                    from scenografia.agents.prompt_enhancer_agent import PromptEnhancerAgent
+                    enhancer = PromptEnhancerAgent()
+                    passed_img_bytes = ref_image_bytes if use_as_style else None
+                    enhanced = enhancer.enhance_prompt(
+                        prompt, 
+                        model_id=model_override if model_override else None,
+                        image_bytes=passed_img_bytes,
+                        division=division
+                    )
+                    st.session_state.enhanced_prompt = enhanced
+                except Exception as e:
+                    st.error(f"Errore: {str(e)}")
                         
     # If enhanced prompt exists, show proposal box
     if st.session_state.enhanced_prompt:
@@ -592,13 +637,16 @@ def main():
             try:
                 status_placeholder = st.empty()
                 with st.spinner("Pipeline attiva..."):
+                    passed_layout_bytes = ref_image_bytes if use_as_layout else None
                     result = run_text_generation(
                         prompt=prompt,
                         mode=mode,
                         orientation=orientation,
                         model=model_override if model_override else None,
                         style=selected_style_name,
-                        progress_callback=update_progress
+                        progress_callback=update_progress,
+                        input_image_bytes=passed_layout_bytes,
+                        division=division
                     )
                 status_placeholder.empty()
                 st.success("✅ Generazione completata!")

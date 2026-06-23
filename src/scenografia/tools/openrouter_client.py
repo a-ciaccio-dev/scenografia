@@ -303,6 +303,7 @@ class OpenRouterClient:
         prompt: str,
         system_instruction: Optional[str] = None,
         model_id: str = "google/gemini-2.5-flash",
+        image_bytes: Optional[bytes] = None,
     ) -> str:
         """
         Generate a text response using OpenRouter chat/completions.
@@ -311,6 +312,7 @@ class OpenRouterClient:
             prompt: User message content
             system_instruction: Optional system instruction
             model_id: Model identifier
+            image_bytes: Optional bytes of an image to analyze
             
         Returns:
             Generated text content
@@ -322,9 +324,27 @@ class OpenRouterClient:
                     "role": "system",
                     "content": system_instruction
                 })
+            
+            if image_bytes:
+                base64_str = base64.b64encode(image_bytes).decode("utf-8")
+                content = [
+                    {
+                        "type": "text",
+                        "text": prompt
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/png;base64,{base64_str}"
+                        }
+                    }
+                ]
+            else:
+                content = prompt
+
             messages.append({
                 "role": "user",
-                "content": prompt
+                "content": content
             })
             
             payload = {

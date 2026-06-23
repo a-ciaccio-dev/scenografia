@@ -397,3 +397,101 @@ class TestImageToImageGeneration:
         assert "steampunk" in content[0]["text"]
         assert content[1]["type"] == "image_url"
         assert content[1]["image_url"]["url"].startswith("data:image/png;base64,")
+
+
+class TestGenerateText:
+    """Test text generation (OpenRouter chat/completions)."""
+    
+    @patch('scenografia.tools.openrouter_client.httpx.Client')
+    def test_generate_text_simple(self, mock_client_class):
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "choices": [
+                {
+                    "message": {
+                        "content": "Enhanced Prompt"
+                    }
+                }
+            ]
+        }
+        mock_client = MagicMock()
+        mock_client.post.return_value = mock_response
+        mock_client_class.return_value = mock_client
+        
+        client = OpenRouterClient(api_key="test-key")
+        client.client = mock_client
+        
+        res = client.generate_text("Concept prompt")
+        assert res == "Enhanced Prompt"
+        
+        mock_client.post.assert_called_once()
+        _, kwargs = mock_client.post.call_args
+        json_payload = kwargs["json"]
+        assert json_payload["model"] == "google/gemini-2.5-flash"
+        assert json_payload["messages"][0]["role"] == "user"
+        assert json_payload["messages"][0]["content"] == "Concept prompt"
+
+    @patch('scenografia.tools.openrouter_client.httpx.Client')
+    def test_generate_text_with_system_instruction_and_image(self, mock_client_class):
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "choices": [
+                {
+                    "message": {
+                        "content": "Enhanced with image analysis"
+                    }
+                }
+            ]
+        }
+        mock_client = MagicMock()
+        mock_client.post.return_value = mock_response
+        mock_client_class.return_value = mock_client
+        
+        client = OpenRouterClient(api_key="test-key")
+        client.client = mock_client
+        
+        res = client.generate_text(
+            prompt="Concept prompt",
+            system_instruction="System rule",
+            model_id="custom-enhancer",
+            image_bytes=b"fake-image"
+        )
+        assert res == "Enhanced with image analysis"
+        
+        mock_client.post.assert_called_once()
+        _, kwargs = mock_client.post.call_args
+        json_payload = kwargs["json"]
+        assert json_payload["model"] == "custom-enhancer"
+        
+        messages = json_payload["messages"]
+        assert len(messages) == 2
+        assert messages[0]["role"] == "system"
+        assert messages[0]["content"] == "System rule"
+        
+        assert messages[1]["role"] == "user"
+        content = messages[1]["content"]
+        assert isinstance(content, list)
+        assert content[0]["type"] == "text"
+        assert content[0]["text"] == "Concept prompt"
+        assert content[1]["type"] == "image_url"
+        assert content[1]["image_url"]["url"].startswith("data:image/png;base64,")
+
+    @patch('scenografia.tools.openrouter_client.httpx.Client')
+    def test_generate_text_error_handling(self, mock_client_class):
+        mock_response = Mock()
+        mock_response.status_code = 500
+        mock_response.text = "Internal Server Error"
+        
+        mock_client = MagicMock()
+        mock_client.post.return_value = mock_response
+        mock_client_class.return_value = mock_client
+        
+        client = OpenRouterClient(api_key="test-key")
+        client.client = mock_client
+        
+        with pytest.raises(RuntimeError) as exc_info:
+            client.generate_text("Concept prompt")
+        assert "OpenRouter API error 500" in str(exc_info.value)
+

@@ -62,3 +62,60 @@ class TestPromptEnhancerAgent:
 
         result = agent.enhance_prompt("concept")
         assert result == "An enhanced description."
+
+    def test_enhance_prompt_with_image_bytes(self):
+        """Enhancing a prompt with image bytes should append vision instructions and pass image_bytes to generate_text."""
+        mock_client = Mock()
+        mock_client.generate_text.return_value = "Enhanced prompt with image characteristics"
+        agent = PromptEnhancerAgent(client=mock_client)
+
+        fake_image = b"image-payload-bytes"
+        result = agent.enhance_prompt("scenic concept", image_bytes=fake_image)
+
+        assert result == "Enhanced prompt with image characteristics"
+        mock_client.generate_text.assert_called_once()
+        _, kwargs = mock_client.generate_text.call_args
+        assert "Analyze the style, composition" in kwargs["prompt"]
+        assert "scenic concept" in kwargs["prompt"]
+        assert kwargs["image_bytes"] == fake_image
+
+    def test_enhance_prompt_with_division_2_parts(self):
+        """Enhancing a prompt with division='2 parti' should add layout partition instructions to system_instruction."""
+        mock_client = Mock()
+        mock_client.generate_text.return_value = "Divided scenic prompt"
+        agent = PromptEnhancerAgent(client=mock_client)
+
+        result = agent.enhance_prompt("concept", division="2 parti")
+
+        assert result == "Divided scenic prompt"
+        mock_client.generate_text.assert_called_once()
+        _, kwargs = mock_client.generate_text.call_args
+        assert "divided into 2 sections" in kwargs["system_instruction"]
+        assert "symmetrical halves" in kwargs["system_instruction"]
+
+    def test_enhance_prompt_with_division_3_parts(self):
+        """Enhancing a prompt with division='3 parti' should add layout partition instructions to system_instruction."""
+        mock_client = Mock()
+        mock_client.generate_text.return_value = "Three panel scenic prompt"
+        agent = PromptEnhancerAgent(client=mock_client)
+
+        result = agent.enhance_prompt("concept", division="3 parti")
+
+        assert result == "Three panel scenic prompt"
+        mock_client.generate_text.assert_called_once()
+        _, kwargs = mock_client.generate_text.call_args
+        assert "divided into 3 panels" in kwargs["system_instruction"]
+
+    def test_enhance_prompt_with_division_4_parts(self):
+        """Enhancing a prompt with division='4 parti' should add layout partition instructions to system_instruction."""
+        mock_client = Mock()
+        mock_client.generate_text.return_value = "Four panel scenic prompt"
+        agent = PromptEnhancerAgent(client=mock_client)
+
+        result = agent.enhance_prompt("concept", division="4 parti")
+
+        assert result == "Four panel scenic prompt"
+        mock_client.generate_text.assert_called_once()
+        _, kwargs = mock_client.generate_text.call_args
+        assert "divided into 4 panels" in kwargs["system_instruction"]
+
