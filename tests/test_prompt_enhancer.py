@@ -53,3 +53,12 @@ class TestPromptEnhancerAgent:
 
         result = agent.enhance_prompt("original prompt")
         assert result == "original prompt"
+
+    def test_enhance_prompt_strips_quotes(self):
+        """Enhancing a prompt should strip outer double or single quotes."""
+        mock_client = Mock()
+        mock_client.generate_text.return_value = '  "An enhanced description."  '
+        agent = PromptEnhancerAgent(client=mock_client)
+
+        result = agent.enhance_prompt("concept")
+        assert result == "An enhanced description."
