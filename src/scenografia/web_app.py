@@ -418,17 +418,19 @@ def main():
                 """,
                 unsafe_allow_html=True
             )
+            def approve_callback():
+                st.session_state.text_prompt_input = st.session_state.enhanced_prompt
+                st.session_state.prompt_val = st.session_state.enhanced_prompt
+                st.session_state.enhanced_prompt = None
+
+            def reject_callback():
+                st.session_state.enhanced_prompt = None
+
             col_acc, col_rej = st.columns(2)
             with col_acc:
-                if st.button("✅ Approva e Applica", key="btn_approve_enhanced"):
-                    st.session_state.text_prompt_input = st.session_state.enhanced_prompt
-                    st.session_state.prompt_val = st.session_state.enhanced_prompt
-                    st.session_state.enhanced_prompt = None
-                    st.rerun()
+                st.button("✅ Approva e Applica", key="btn_approve_enhanced", on_click=approve_callback)
             with col_rej:
-                if st.button("❌ Rifiuta", key="btn_reject_enhanced"):
-                    st.session_state.enhanced_prompt = None
-                    st.rerun()
+                st.button("❌ Rifiuta", key="btn_reject_enhanced", on_click=reject_callback)
 
         # Composed Prompt Live Preview
         from scenografia.styles.loader import load_style_by_name
