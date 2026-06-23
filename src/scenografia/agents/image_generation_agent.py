@@ -71,8 +71,11 @@ class TextGenerationService:
         orientation: Orientation,
         model: str | None,
         style: str | None = "Default",
+        progress_callback: callable = None,
     ) -> dict:
         """Execute the text-mode generation pipeline end to end."""
+        if progress_callback:
+            progress_callback("brief")
         normalized_mode = mode if isinstance(mode, GenerationMode) else GenerationMode(mode)
         request = GenerationRequest(
             input_type="text",
@@ -83,8 +86,39 @@ class TextGenerationService:
             selected_style=style or "Default",
         )
         brief = self.brief_agent.create_from_text(request)
+        
+        if progress_callback:
+            progress_callback("prompt")
         prompt_package = self.prompt_engineer.build_prompt_package(brief)
-        response = self._get_image_generator().generate(request, prompt_package, brief)
+        
+        # generate -> validate -> refine -> regenerate loop
+        from scenografia.tools.style_validator import StyleValidator
+        max_attempts = 3
+        response = None
+        for attempt in range(max_attempts):
+            style_valid, style_issues = StyleValidator.validate_style_contract(prompt_package["final_prompt"])
+            neg_valid, neg_issues = StyleValidator.validate_negative_constraints(prompt_package["negative_prompt"])
+            issues = [*style_issues, *neg_issues]
+            
+            if issues:
+                if progress_callback:
+                    progress_callback("refine")
+                if hasattr(self.prompt_engineer, "refine_prompt_package"):
+                    prompt_package = self.prompt_engineer.refine_prompt_package(prompt_package, issues)
+            
+            try:
+                if progress_callback:
+                    progress_callback("generate")
+                response = self._get_image_generator().generate(request, prompt_package, brief)
+                break
+            except Exception as e:
+                if attempt == max_attempts - 1:
+                    raise e
+                if hasattr(self.prompt_engineer, "refine_prompt_package"):
+                    prompt_package = self.prompt_engineer.refine_prompt_package(prompt_package, [f"Error: {str(e)}"])
+
+        if progress_callback:
+            progress_callback("validate")
         validation_report = self.style_validator.validate_text_run(brief, prompt_package, response)
         metadata = GenerationMetadata(
             run_id=response.request_id,
@@ -99,6 +133,8 @@ class TextGenerationService:
             image_url=response.image_url,
         )
         try:
+            if progress_callback:
+                progress_callback("persist")
             return self.output_manager.persist_text_run(
                 brief=brief,
                 prompt_package=prompt_package,
@@ -149,8 +185,11 @@ class SketchGenerationService:
         model: str | None,
         disable_ai_refinement: bool,
         style_name: str | None = "Default",
+        progress_callback: callable = None,
     ) -> dict:
         """Execute the sketch-mode generation pipeline end to end."""
+        if progress_callback:
+            progress_callback("brief")
         normalized_mode = mode if isinstance(mode, GenerationMode) else GenerationMode(mode)
         request = GenerationRequest(
             input_type="sketch",
@@ -165,15 +204,47 @@ class SketchGenerationService:
         output_dir = OutputManager.create_output_directory(Path(sketch_path).stem)
         interpretation = self.sketch_interpreter.interpret(request, output_dir)
         brief = self.brief_agent.create_from_sketch(request, interpretation)
+        
+        if progress_callback:
+            progress_callback("prompt")
         prompt_package = self.prompt_engineer.build_prompt_package(brief)
-        try:
-            return self._complete_generation(request, brief, prompt_package, interpretation, output_dir)
-        except TypeError:
+        import inspect
+        sig = inspect.signature(self._complete_generation)
+        if "output_dir" in sig.parameters or "progress_callback" in sig.parameters:
+            return self._complete_generation(request, brief, prompt_package, interpretation, output_dir, progress_callback)
+        else:
             return self._complete_generation(request, brief, prompt_package, interpretation)
 
-    def _complete_generation(self, request, brief, prompt_package, interpretation, output_dir=None) -> dict:
+    def _complete_generation(self, request, brief, prompt_package, interpretation, output_dir=None, progress_callback=None) -> dict:
         """Finish provider generation and artifact persistence for sketch mode."""
-        response = self._get_image_generator().generate(request, prompt_package, brief)
+        # generate -> validate -> refine -> regenerate loop
+        from scenografia.tools.style_validator import StyleValidator
+        max_attempts = 3
+        response = None
+        for attempt in range(max_attempts):
+            style_valid, style_issues = StyleValidator.validate_style_contract(prompt_package["final_prompt"])
+            neg_valid, neg_issues = StyleValidator.validate_negative_constraints(prompt_package["negative_prompt"])
+            issues = [*style_issues, *neg_issues]
+            
+            if issues:
+                if progress_callback:
+                    progress_callback("refine")
+                if hasattr(self.prompt_engineer, "refine_prompt_package"):
+                    prompt_package = self.prompt_engineer.refine_prompt_package(prompt_package, issues)
+            
+            try:
+                if progress_callback:
+                    progress_callback("generate")
+                response = self._get_image_generator().generate(request, prompt_package, brief)
+                break
+            except Exception as e:
+                if attempt == max_attempts - 1:
+                    raise e
+                if hasattr(self.prompt_engineer, "refine_prompt_package"):
+                    prompt_package = self.prompt_engineer.refine_prompt_package(prompt_package, [f"Error: {str(e)}"])
+
+        if progress_callback:
+            progress_callback("validate")
         validation_report = self.style_validator.validate_text_run(brief, prompt_package, response)
         metadata = GenerationMetadata(
             run_id=response.request_id,
@@ -187,6 +258,8 @@ class SketchGenerationService:
             negative_prompt=prompt_package["negative_prompt"],
             image_url=response.image_url,
         )
+        if progress_callback:
+            progress_callback("persist")
         result = self.output_manager.persist_text_run(
             brief=brief,
             prompt_package=prompt_package,

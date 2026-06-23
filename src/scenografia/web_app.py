@@ -46,7 +46,7 @@ def load_config() -> tuple[bool, str]:
 
 
 def run_text_generation(
-    prompt: str, mode: str, orientation: str, model: Optional[str] = None, style: Optional[str] = "Default"
+    prompt: str, mode: str, orientation: str, model: Optional[str] = None, style: Optional[str] = "Default", progress_callback: Optional[callable] = None
 ) -> dict:
     """
     Wrapper for TextGenerationService.run_text_generation().
@@ -59,6 +59,7 @@ def run_text_generation(
         orientation: Orientation value (portrait, landscape, square)
         model: Optional model override
         style: Optional style name
+        progress_callback: Optional progress callback function
         
     Returns:
         Result dict with output_dir, image_path, prompt_path, etc.
@@ -75,6 +76,7 @@ def run_text_generation(
             orientation=Orientation(orientation),
             model=model,
             style=style,
+            progress_callback=progress_callback,
         )
         logger.info(f"Text generation completata con successo. Risultati in: {result.get('output_dir')}")
         return result
@@ -84,7 +86,7 @@ def run_text_generation(
 
 
 def run_sketch_generation(
-    sketch_path: str, style: str, mode: str, orientation: str, model: Optional[str] = None, style_name: Optional[str] = "Default"
+    sketch_path: str, style: str, mode: str, orientation: str, model: Optional[str] = None, style_name: Optional[str] = "Default", progress_callback: Optional[callable] = None
 ) -> dict:
     """
     Wrapper for SketchGenerationService.run_sketch_generation().
@@ -98,6 +100,7 @@ def run_sketch_generation(
         orientation: Orientation value
         model: Optional model override
         style_name: Selected user style name
+        progress_callback: Optional progress callback function
         
     Returns:
         Result dict with output_dir, image_path, processed_sketch_path, etc.
@@ -116,6 +119,7 @@ def run_sketch_generation(
             model=model,
             disable_ai_refinement=False,
             style_name=style_name,
+            progress_callback=progress_callback,
         )
         logger.info(f"Sketch generation completata con successo. Risultati in: {result.get('output_dir')}")
         return result
@@ -213,7 +217,6 @@ def main():
     st.set_page_config(page_title="Scenografia", layout="wide")
     st.title("🎭 Scenografia")
     st.markdown("AI-powered theatrical scenic design generation from text or sketch")
-    
     # Initialize config on first load
     if "config_ok" not in st.session_state:
         config_ok, config_msg = load_config()
@@ -224,10 +227,72 @@ def main():
         st.error(f"❌ {st.session_state.config_msg}")
         return
     
+    # Initialize prompt values in session state
+    if "prompt_val" not in st.session_state:
+        st.session_state.prompt_val = ""
+    if "enhanced_prompt" not in st.session_state:
+        st.session_state.enhanced_prompt = None
+
     # Load user styles
     from scenografia.styles.loader import load_styles, save_style
     styles_list = load_styles()
     style_names = [s["name"] for s in styles_list]
+
+    # Inject Custom CSS for Premium Look
+    st.markdown(
+        """
+        <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+        
+        html, body, [class*="css"] {
+            font-family: 'Outfit', sans-serif !important;
+        }
+        
+        .main-title {
+            font-size: 3rem !important;
+            font-weight: 700 !important;
+            background: linear-gradient(90deg, #64dfdf, #48cae4, #0077b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.2rem !important;
+        }
+        
+        .stButton button {
+            background-color: #0077b6 !important;
+            color: white !important;
+            border-radius: 8px !important;
+            border: none !important;
+            padding: 0.6rem 1.5rem !important;
+            font-weight: 600 !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        .stButton button:hover {
+            background-color: #0096c7 !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15) !important;
+        }
+        
+        /* Container styling */
+        div[data-testid="stVerticalBlockBorderWrapper"] {
+            border-radius: 12px !important;
+            transition: all 0.3s ease;
+        }
+        
+        /* Custom progress logs layout */
+        .progress-box {
+            background-color: #12131a;
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid #2d3142;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
     # Sidebar configuration
     with st.sidebar:
@@ -290,6 +355,26 @@ def main():
     # Main content: tabs for workflow selection
     tab_text, tab_sketch = st.tabs(["📝 Da Prompt", "🎨 Da Sketch"])
     
+    # Step-by-step progress update callback helper
+    def update_progress(step):
+        steps = {
+            "brief": "🔄 [1/5] Normalizzazione del brief scenografico...",
+            "prompt": "🔄 [2/5] Elaborazione dello stile e dei vincoli...",
+            "refine": "🔄 [3/5] Ottimizzazione e autoverifica del prompt...",
+            "generate": "🔄 [4/5] Chiamata alle API di OpenRouter (Generazione)...",
+            "validate": "🔄 [5/5] Validazione di conformità finale...",
+            "persist": "💾 [✓] Salvataggio degli artefatti in corso..."
+        }
+        msg = steps.get(step, "🔄 Elaborazione in corso...")
+        status_placeholder.markdown(
+            f"""
+            <div class="progress-box">
+                <span style="color: #64dfdf; font-weight: bold;">Status Pipeline:</span> {msg}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
     # ========================
     # TAB 1: Text Prompt
     # ========================
@@ -298,11 +383,61 @@ def main():
         
         prompt = st.text_area(
             "Descrizione scenografica",
+            value=st.session_state.prompt_val,
             placeholder="Es: A mystical forest with ancient stone pillars and magical lights...",
             height=120,
-            key="text_prompt"
+            key="text_prompt_input"
         )
+        # Keep session state updated with manual input changes
+        st.session_state.prompt_val = prompt
         
+        # AI Prompt Enhancer Action
+        col_enh_1, col_enh_2 = st.columns([1, 1])
+        with col_enh_1:
+            if st.button("✨ Migliora con AI Assistant", key="btn_enhance"):
+                if not prompt.strip():
+                    st.warning("⚠️ Inserisci prima una descrizione di base da migliorare.")
+                else:
+                    with st.spinner("L'assistente AI sta arricchendo la scena..."):
+                        try:
+                            from scenografia.agents.prompt_enhancer_agent import PromptEnhancerAgent
+                            enhancer = PromptEnhancerAgent()
+                            enhanced = enhancer.enhance_prompt(prompt, model_id=model_override if model_override else None)
+                            st.session_state.enhanced_prompt = enhanced
+                        except Exception as e:
+                            st.error(f"Errore: {str(e)}")
+                            
+        # If enhanced prompt exists, show proposal box
+        if st.session_state.enhanced_prompt:
+            st.markdown(
+                f"""
+                <div style="background-color: #1a1c23; border-radius: 10px; padding: 15px; border: 1px solid #3b3f54; margin: 10px 0;">
+                    <div style="color: #64dfdf; font-weight: bold; font-size: 15px; margin-bottom: 8px;">✨ Proposta dell'Assistente AI:</div>
+                    <div style="color: #d1d5db; font-style: italic; font-size: 14px; line-height: 1.5;">"{st.session_state.enhanced_prompt}"</div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+            col_acc, col_rej = st.columns(2)
+            with col_acc:
+                if st.button("✅ Approva e Applica", key="btn_approve_enhanced"):
+                    st.session_state.prompt_val = st.session_state.enhanced_prompt
+                    st.session_state.enhanced_prompt = None
+                    st.rerun()
+            with col_rej:
+                if st.button("❌ Rifiuta", key="btn_reject_enhanced"):
+                    st.session_state.enhanced_prompt = None
+                    st.rerun()
+
+        # Composed Prompt Live Preview
+        from scenografia.styles.loader import load_style_by_name
+        style_obj = load_style_by_name(selected_style_name)
+        style_additions = style_obj.get("prompt_additions", "")
+        preview_prompt = f"{BASE_PROMPT}\n{style_additions}\n{prompt}"
+        
+        with st.expander("🔍 Anteprima Live del Prompt Finale", expanded=False):
+            st.text_area("Prompt finale composto (sola lettura)", preview_prompt, height=180, disabled=True)
+
         col1, col2 = st.columns(2)
         with col1:
             generate_button = st.button("🚀 Genera scenografia", key="generate_text")
@@ -312,16 +447,17 @@ def main():
                 st.warning("⚠️ Inserisci un prompt")
             else:
                 try:
-                    with st.spinner("Generazione in corso..."):
+                    status_placeholder = st.empty()
+                    with st.spinner("Pipeline attiva..."):
                         result = run_text_generation(
                             prompt=prompt,
                             mode=mode,
                             orientation=orientation,
                             model=model_override if model_override else None,
-                            style=selected_style_name
+                            style=selected_style_name,
+                            progress_callback=update_progress
                         )
-                    
-                    # Display results
+                    status_placeholder.empty()
                     st.success("✅ Generazione completata!")
                     
                     output_dir = result.get("output_dir")
@@ -368,7 +504,8 @@ def main():
                 st.warning("⚠️ Inserisci indicazioni di stile")
             else:
                 try:
-                    with st.spinner("Processing sketch e generazione in corso..."):
+                    status_placeholder = st.empty()
+                    with st.spinner("Processing sketch e generazione..."):
                         # Save uploaded sketch
                         sketches_dir = Path("input/sketches")
                         sketch_path = save_uploaded_sketch(
@@ -384,9 +521,10 @@ def main():
                             mode=mode,
                             orientation=orientation,
                             model=model_override if model_override else None,
-                            style_name=selected_style_name
+                            style_name=selected_style_name,
+                            progress_callback=update_progress
                         )
-                    
+                    status_placeholder.empty()
                     st.success("✅ Generazione completata!")
                     
                     output_dir = result.get("output_dir")
@@ -405,36 +543,34 @@ def main():
                     st.error(f"❌ Errore nella generazione: {str(e)}")
     
     # ========================
-    # Gallery: Recent Runs
+    # Gallery Grid: Recent Runs
     # ========================
     st.divider()
-    with st.expander("📚 Run recenti", expanded=False):
-        output_dir = Path("output")
-        recent_runs = list_recent_runs(output_dir, n=5)
-        
-        if not recent_runs:
-            st.info("Nessun run trovato ancora.")
-        else:
-            for run_path in recent_runs:
+    st.subheader("📚 Galleria Scenografica (Run Recenti)")
+    output_dir = Path("output")
+    recent_runs = list_recent_runs(output_dir, n=9)
+    
+    if not recent_runs:
+        st.info("Nessun run trovato ancora.")
+    else:
+        # Show recent runs in a neat 3-column responsive grid
+        cols = st.columns(3)
+        for idx, run_path in enumerate(recent_runs):
+            col = cols[idx % 3]
+            with col:
                 with st.container(border=True):
-                    col1, col2 = st.columns([3, 1])
+                    final_image = find_final_image(run_path)
+                    if final_image:
+                        st.image(str(final_image), use_container_width=True)
                     
-                    with col1:
-                        st.subheader(run_path.name)
-                        
-                        # Show validation report if available
-                        report = read_validation_report(run_path)
-                        if report:
-                            orientation_val = report.get("orientation", "N/A")
-                            valid = report.get("orientation_valid", False)
-                            status = "✅ Valido" if valid else "⚠️ Non valido"
-                            st.caption(f"{status} | Orientation: {orientation_val}")
+                    st.markdown(f"**{run_path.name[:25]}...**")
                     
-                    with col2:
-                        # Show final.png thumbnail if available
-                        final_image = find_final_image(run_path)
-                        if final_image:
-                            st.image(str(final_image), width=150)
+                    report = read_validation_report(run_path)
+                    if report:
+                        val = report.get("orientation_valid", False)
+                        style_val = report.get("style_contract_applied", False)
+                        status_badge = "🟢 Conforme" if (val and style_val) else "🟡 Avviso"
+                        st.caption(f"{status_badge} | {report.get('orientation', 'N/A')}")
 
 
 if __name__ == "__main__":

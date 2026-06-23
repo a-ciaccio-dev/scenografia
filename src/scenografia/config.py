@@ -32,6 +32,9 @@ class Config:
     OPENROUTER_API_KEY: str
     OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1"
     
+    # Optional enhancer model
+    OPENROUTER_ENHANCER_MODEL: str = "google/gemini-2.5-flash"
+    
     # Application directories
     APP_INPUT_DIR: str = "input"
     APP_OUTPUT_DIR: str = "output"
@@ -59,6 +62,12 @@ class Config:
         cls.OPENROUTER_BASE_URL = os.getenv(
             "OPENROUTER_BASE_URL",
             "https://openrouter.ai/api/v1"
+        )
+        
+        # Optional: Enhancer Model
+        cls.OPENROUTER_ENHANCER_MODEL = os.getenv(
+            "OPENROUTER_ENHANCER_MODEL",
+            "google/gemini-2.5-flash"
         )
         
         # Optional: Directories

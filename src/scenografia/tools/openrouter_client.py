@@ -273,6 +273,55 @@ class OpenRouterClient:
         """
         return self._download_image_from_url(url)
 
+    def generate_text(
+        self,
+        prompt: str,
+        system_instruction: Optional[str] = None,
+        model_id: str = "google/gemini-2.5-flash",
+    ) -> str:
+        """
+        Generate a text response using OpenRouter chat/completions.
+        
+        Args:
+            prompt: User message content
+            system_instruction: Optional system instruction
+            model_id: Model identifier
+            
+        Returns:
+            Generated text content
+        """
+        try:
+            messages = []
+            if system_instruction:
+                messages.append({
+                    "role": "system",
+                    "content": system_instruction
+                })
+            messages.append({
+                "role": "user",
+                "content": prompt
+            })
+            
+            payload = {
+                "model": model_id,
+                "messages": messages,
+                "stream": False
+            }
+            
+            response = self.client.post(
+                f"{self.base_url}/chat/completions",
+                json=payload,
+                timeout=45.0
+            )
+            
+            if response.status_code != 200:
+                raise RuntimeError(f"OpenRouter API error {response.status_code}: {response.text[:200]}")
+                
+            data = response.json()
+            return data["choices"][0]["message"]["content"].strip()
+        except Exception as e:
+            raise RuntimeError(f"Text generation failed: {str(e)}")
+
 
 class ProviderAdapter:
     """

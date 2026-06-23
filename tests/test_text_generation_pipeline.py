@@ -30,6 +30,9 @@ class StubPromptEngineerAgent:
             "orientation_applied": True,
         }
 
+    def refine_prompt_package(self, prompt_package, issues):
+        return prompt_package
+
 
 class StubImageGenerationAgent:
     def generate(self, request: GenerationRequest, prompt_package, brief):
