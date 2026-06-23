@@ -421,6 +421,7 @@ def main():
             col_acc, col_rej = st.columns(2)
             with col_acc:
                 if st.button("✅ Approva e Applica", key="btn_approve_enhanced"):
+                    st.session_state.text_prompt_input = st.session_state.enhanced_prompt
                     st.session_state.prompt_val = st.session_state.enhanced_prompt
                     st.session_state.enhanced_prompt = None
                     st.rerun()
