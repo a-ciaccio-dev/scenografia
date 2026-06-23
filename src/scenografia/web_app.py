@@ -132,6 +132,69 @@ def run_sketch_generation(
         raise e
 
 
+def on_regenerate(output_dir, image_path_obj, sketch_path, original_prompt, orientation_val, input_type, selected_style, new_mode_key, additions_key):
+    """Callback per il tasto di rigenerazione: unisce il prompt originale con le modifiche e avvia la generazione."""
+    import streamlit as st
+    
+    selected_new_mode = st.session_state.get(new_mode_key, "standard")
+    prompt_additions = st.session_state.get(additions_key, "")
+    
+    # Costruisci prompt combinato
+    combined_prompt = original_prompt
+    if prompt_additions.strip():
+        if combined_prompt.endswith(".") or combined_prompt.endswith("!") or combined_prompt.endswith("?"):
+            combined_prompt = f"{combined_prompt} {prompt_additions.strip()}"
+        else:
+            combined_prompt = f"{combined_prompt}. {prompt_additions.strip()}"
+            
+    # Aggiorna i campi di input nella session_state
+    st.session_state.prompt_val = combined_prompt
+    st.session_state.text_prompt_input = combined_prompt
+    st.session_state.sketch_style = combined_prompt
+    
+    try:
+        # Leggi l'immagine precedente come bytes per image-to-image
+        with open(image_path_obj, "rb") as img_file:
+            prev_image_bytes = img_file.read()
+        
+        if input_type == "sketch":
+            run_sketch = sketch_path if sketch_path else str(image_path_obj.parent / "processed_sketch.png")
+            result = run_sketch_generation(
+                sketch_path=str(run_sketch),
+                style=combined_prompt,
+                mode=selected_new_mode,
+                orientation=orientation_val,
+                model=None,
+                style_name=selected_style,
+                input_image_bytes=prev_image_bytes
+            )
+            st.session_state.active_generation = {
+                "output_dir": result.get("output_dir"),
+                "image_path": result.get("image_path"),
+                "prompt_path": result.get("prompt_path"),
+                "sketch_path": result.get("processed_sketch_path")
+            }
+        else:
+            result = run_text_generation(
+                prompt=combined_prompt,
+                mode=selected_new_mode,
+                orientation=orientation_val,
+                model=None,
+                style=selected_style,
+                input_image_bytes=prev_image_bytes
+            )
+            st.session_state.active_generation = {
+                "output_dir": result.get("output_dir"),
+                "image_path": result.get("image_path"),
+                "prompt_path": result.get("prompt_path"),
+                "sketch_path": None
+            }
+        st.session_state.regen_success = "✅ Generazione completata con nuovo modello!"
+    except Exception as e:
+        logger.error(f"Errore nella rigenerazione: {str(e)}", exc_info=True)
+        st.session_state.regen_error = f"❌ Errore nella rigenerazione: {str(e)}"
+
+
 def display_generation_results(
     output_dir: str | Path,
     image_path: Optional[str | Path],
@@ -162,6 +225,13 @@ def display_generation_results(
     
     # Image tab
     with result_tab_image:
+        if "regen_success" in st.session_state and st.session_state.regen_success:
+            st.success(st.session_state.regen_success)
+            del st.session_state.regen_success
+        if "regen_error" in st.session_state and st.session_state.regen_error:
+            st.error(st.session_state.regen_error)
+            del st.session_state.regen_error
+
         if image_path:
             image_path_obj = Path(image_path)
             if image_path_obj.exists():
@@ -190,9 +260,9 @@ def display_generation_results(
                         pass
                 
                 all_modes = ["draft", "standard", "production", "vector-ready"]
-                other_modes = [m for m in all_modes if m != used_mode]
+                default_idx = all_modes.index(used_mode) if used_mode in all_modes else 1
                 
-                col_dl, col_sel, col_go = st.columns([2, 3, 1])
+                col_dl, col_sel, col_mod, col_go = st.columns([2, 2, 5, 1])
                 with col_dl:
                     with open(image_path_obj, "rb") as f:
                         st.download_button(
@@ -205,57 +275,37 @@ def display_generation_results(
                 with col_sel:
                     selected_new_mode = st.selectbox(
                         "Rigenera con modalità:",
-                        options=other_modes,
+                        options=all_modes,
+                        index=default_idx,
                         label_visibility="collapsed",
                         key=f"select_new_mode_{output_dir}"
                     )
                     
-                with col_go:
-                    go_clicked = st.button("GO", key=f"btn_go_{output_dir}")
+                with col_mod:
+                    prompt_additions = st.text_input(
+                        "Modifiche al prompt",
+                        placeholder="Cose da aggiungere al prompt...",
+                        label_visibility="collapsed",
+                        key=f"prompt_additions_{output_dir}"
+                    )
                     
-                if go_clicked:
-                    with st.spinner("Rigenerazione con nuovo modello..."):
-                        try:
-                            # Read current image bytes
-                            with open(image_path_obj, "rb") as img_file:
-                                prev_image_bytes = img_file.read()
-                            
-                            if input_type == "sketch":
-                                run_sketch = sketch_path if sketch_path else str(image_path_obj.parent / "processed_sketch.png")
-                                result = run_sketch_generation(
-                                    sketch_path=str(run_sketch),
-                                    style=original_prompt,
-                                    mode=selected_new_mode,
-                                    orientation=orientation_val,
-                                    model=None,
-                                    style_name=selected_style,
-                                    input_image_bytes=prev_image_bytes
-                                )
-                                st.session_state.active_generation = {
-                                    "output_dir": result.get("output_dir"),
-                                    "image_path": result.get("image_path"),
-                                    "prompt_path": result.get("prompt_path"),
-                                    "sketch_path": result.get("processed_sketch_path")
-                                }
-                            else:
-                                result = run_text_generation(
-                                    prompt=original_prompt,
-                                    mode=selected_new_mode,
-                                    orientation=orientation_val,
-                                    model=None,
-                                    style=selected_style,
-                                    input_image_bytes=prev_image_bytes
-                                )
-                                st.session_state.active_generation = {
-                                    "output_dir": result.get("output_dir"),
-                                    "image_path": result.get("image_path"),
-                                    "prompt_path": result.get("prompt_path"),
-                                    "sketch_path": None
-                                }
-                            st.success("✅ Generazione completata con nuovo modello!")
-                            st.rerun()
-                        except Exception as e:
-                            st.error(f"❌ Errore nella rigenerazione: {str(e)}")
+                with col_go:
+                    st.button(
+                        "GO",
+                        key=f"btn_go_{output_dir}",
+                        on_click=on_regenerate,
+                        args=(
+                            output_dir,
+                            image_path_obj,
+                            sketch_path,
+                            original_prompt,
+                            orientation_val,
+                            input_type,
+                            selected_style,
+                            f"select_new_mode_{output_dir}",
+                            f"prompt_additions_{output_dir}"
+                        )
+                    )
             else:
                 st.warning("Immagine finale non trovata")
         else:
