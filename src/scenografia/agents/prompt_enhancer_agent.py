@@ -45,7 +45,7 @@ class PromptEnhancerAgent:
                 system_instruction=system_instruction,
                 model_id=model,
             )
-            return enhanced.strip()
+            return enhanced.strip().strip('"').strip("'")
         except Exception as e:
             # Fallback to the original prompt if API call fails
             return raw_prompt

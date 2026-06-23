@@ -112,12 +112,7 @@ class TextGenerationService:
                 if progress_callback:
                     progress_callback("generate")
                 generator = self._get_image_generator()
-                import inspect
-                sig = inspect.signature(generator.generate)
-                if "input_image_bytes" in sig.parameters:
-                    response = generator.generate(request, prompt_package, brief, input_image_bytes=input_image_bytes)
-                else:
-                    response = generator.generate(request, prompt_package, brief)
+                response = generator.generate(request, prompt_package, brief, input_image_bytes=input_image_bytes)
                 break
             except Exception as e:
                 if attempt == max_attempts - 1:
@@ -140,23 +135,15 @@ class TextGenerationService:
             negative_prompt=prompt_package["negative_prompt"],
             image_url=response.image_url,
         )
-        try:
-            if progress_callback:
-                progress_callback("persist")
-            return self.output_manager.persist_text_run(
-                brief=brief,
-                prompt_package=prompt_package,
-                response=response,
-                validation_report=validation_report,
-                metadata=metadata,
-            )
-        except TypeError:
-            return self.output_manager.persist_text_run(
-                brief,
-                prompt_package,
-                response,
-                validation_report,
-            )
+        if progress_callback:
+            progress_callback("persist")
+        return self.output_manager.persist_text_run(
+            brief=brief,
+            prompt_package=prompt_package,
+            response=response,
+            validation_report=validation_report,
+            metadata=metadata,
+        )
 
 
 class SketchGenerationService:
@@ -217,20 +204,15 @@ class SketchGenerationService:
         if progress_callback:
             progress_callback("prompt")
         prompt_package = self.prompt_engineer.build_prompt_package(brief)
-        import inspect
-        sig = inspect.signature(self._complete_generation)
-        if "output_dir" in sig.parameters or "progress_callback" in sig.parameters:
-            return self._complete_generation(
-                request,
-                brief,
-                prompt_package,
-                interpretation,
-                output_dir=output_dir,
-                progress_callback=progress_callback,
-                input_image_bytes=input_image_bytes
-            )
-        else:
-            return self._complete_generation(request, brief, prompt_package, interpretation)
+        return self._complete_generation(
+            request,
+            brief,
+            prompt_package,
+            interpretation,
+            output_dir=output_dir,
+            progress_callback=progress_callback,
+            input_image_bytes=input_image_bytes
+        )
 
     def _complete_generation(self, request, brief, prompt_package, interpretation, output_dir=None, progress_callback=None, input_image_bytes=None) -> dict:
         """Finish provider generation and artifact persistence for sketch mode."""
@@ -253,12 +235,7 @@ class SketchGenerationService:
                 if progress_callback:
                     progress_callback("generate")
                 generator = self._get_image_generator()
-                import inspect
-                sig = inspect.signature(generator.generate)
-                if "input_image_bytes" in sig.parameters:
-                    response = generator.generate(request, prompt_package, brief, input_image_bytes=input_image_bytes)
-                else:
-                    response = generator.generate(request, prompt_package, brief)
+                response = generator.generate(request, prompt_package, brief, input_image_bytes=input_image_bytes)
                 break
             except Exception as e:
                 if attempt == max_attempts - 1:

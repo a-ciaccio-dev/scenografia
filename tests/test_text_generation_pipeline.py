@@ -35,7 +35,7 @@ class StubPromptEngineerAgent:
 
 
 class StubImageGenerationAgent:
-    def generate(self, request: GenerationRequest, prompt_package, brief):
+    def generate(self, request: GenerationRequest, prompt_package, brief, input_image_bytes=None):
         return ImageGenerationResponse(
             image_url="https://example.com/final.png",
             image_data=b"fake-image",
@@ -60,7 +60,7 @@ class StubOutputManager:
     def __init__(self):
         self.saved_payload = None
 
-    def persist_text_run(self, brief, prompt_package, response, validation_report):
+    def persist_text_run(self, brief, prompt_package, response, validation_report, metadata=None, output_dir=None, processed_sketch_path=None):
         self.saved_payload = {
             "brief": brief,
             "prompt_package": prompt_package,

@@ -36,7 +36,7 @@ def test_sketch_generation_service_disables_ai_refinement_when_requested(monkeyp
     service = SketchGenerationService(sketch_interpreter=StubInterpreter())
     monkeypatch.setattr(
         "scenografia.agents.image_generation_agent.SketchGenerationService._complete_generation",
-        lambda self, request, brief, prompt_package, interpretation: {
+        lambda self, request, brief, prompt_package, interpretation, output_dir=None, progress_callback=None, input_image_bytes=None: {
             "output_dir": "output/run-005",
             "processed_sketch_path": interpretation.processed_sketch_path,
         },
