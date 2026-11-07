@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "scenografia"
 version = "0.1.0"
-description = "AI-powered theatrical scenic design generation CLI"
+description = "AI-powered theatrical scenic design generation CLI and Web Studio"
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
@@ -21,12 +21,15 @@ dependencies = [
     "opencv-python>=4.8.0",
     "numpy>=1.24.0",
     "typer>=0.9.0",
+    "tenacity>=8.2.0",
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=7.4.0",
     "pytest-cov>=4.1.0",
+    "ruff>=0.4.0",
+    "mypy>=1.10.0",
 ]
 web = [
     "streamlit>=1.35",
@@ -36,11 +39,11 @@ web = [
 scenografia = "scenografia.main:app"
 
 [project.urls]
-Repository = "https://github.com/your-org/scenografia"
-Documentation = "https://github.com/your-org/scenografia#readme"
+Repository = "https://github.com/a-ciaccio-dev/scenografia.git"
+Documentation = "https://github.com/a-ciaccio-dev/scenografia#readme"
 
 [tool.setuptools]
-packages = ["scenografia"]
+packages = ["scenografia", "scenografia.agents", "scenografia.providers", "scenografia.schemas", "scenografia.services", "scenografia.styles", "scenografia.tools", "scenografia.web"]
 
 [tool.setuptools.package-data]
 scenografia = ["py.typed"]
@@ -52,3 +55,18 @@ scenografia = ["py.typed"]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 addopts = "-v --cov=src/scenografia --cov-report=term-missing"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = false
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
