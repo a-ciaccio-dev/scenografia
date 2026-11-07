@@ -29,6 +29,9 @@ def render_sidebar_settings(style_names: list[str]) -> dict[str, Any]:
     """
     with st.sidebar:
         st.header("⚙️ Configurazione")
+        from scenografia.config import Config
+        active_provider = getattr(Config, "SCENOGRAFIA_PROVIDER", "antigravity").upper()
+        st.caption(f"⚡ Provider AI: **{active_provider}**")
         mode = st.selectbox(
             "Generation Mode",
             options=["draft", "standard", "production", "vector-ready"],

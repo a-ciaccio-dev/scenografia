@@ -304,7 +304,7 @@ class TestLoadConfigSafety:
 class TestWrapperFunctions:
     """Tests for service wrapper functions."""
     
-    @patch("scenografia.agents.image_generation_agent.TextGenerationService")
+    @patch("scenografia.services.TextGenerationService")
     def test_run_text_generation_calls_service(self, mock_service_class):
         """Should call TextGenerationService with correct args."""
         mock_service = MagicMock()
@@ -327,7 +327,7 @@ class TestWrapperFunctions:
         assert call_kwargs["prompt"] == "Test prompt"
         assert result["output_dir"] == Path("output/run-001")
     
-    @patch("scenografia.agents.image_generation_agent.SketchGenerationService")
+    @patch("scenografia.services.SketchGenerationService")
     def test_run_sketch_generation_calls_service(self, mock_service_class):
         """Should call SketchGenerationService with correct args."""
         mock_service = MagicMock()

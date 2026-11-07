@@ -39,13 +39,13 @@ def load_config() -> tuple[bool, str]:
         return (True, "")
     except KeyError as e:
         logger.error(f"Errore caricamento configurazione (KeyError): {str(e)}")
-        return (False, "Configura OPENROUTER_API_KEY nel file .env")
+        return (False, "Configura OPENROUTER_API_KEY o il provider nel file .env")
     except ValueError as e:
         logger.error(f"Errore caricamento configurazione (ValueError): {str(e)}")
         return (False, f"Errore di configurazione: {str(e)}")
     except Exception as e:
         logger.error(f"Errore caricamento configurazione (Generico): {str(e)}")
-        return (False, "Errore nell'inizializzazione: verifica il file .env e le credenziali")
+        return (False, "Errore nell'inizializzazione: verifica il file .env")
 
 
 def run_text_generation(
@@ -65,7 +65,7 @@ def run_text_generation(
 
     Called only after button press, never during import.
     """
-    from scenografia.agents.image_generation_agent import TextGenerationService
+    from scenografia.services import TextGenerationService
     from scenografia.schemas.generation_schema import GenerationMode, Orientation
 
     # Inject scenic division constraint if requested
@@ -118,7 +118,7 @@ def run_sketch_generation(
 
     Called only after button press, never during import.
     """
-    from scenografia.agents.image_generation_agent import SketchGenerationService
+    from scenografia.services import SketchGenerationService
     from scenografia.schemas.generation_schema import GenerationMode, Orientation
 
     logger.info(f"Avvio sketch generation. Sketch: {sketch_path} | Guidance: '{style}' | Mode: {mode} | Orientation: {orientation} | Style Name: {style_name}")
