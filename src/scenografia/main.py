@@ -45,6 +45,7 @@ def generate(
     model: Optional[str] = typer.Option(None, "--model", help="Optional model override."),
     disable_ai_refinement: bool = typer.Option(False, "--disable-ai-refinement", help="Disable optional AI refinement for sketch mode."),
     export_svg: bool = typer.Option(False, "--export-svg", help="Export vector SVG of the generated scene."),
+    layer: str = typer.Option("all", "--layer", help="Theatrical depth layer: all, background, midground, foreground."),
 ) -> None:
     """Generate a scenic design from text or sketch."""
     if bool(prompt) == bool(sketch):
@@ -69,6 +70,8 @@ def generate(
             kwargs["style"] = style_name
         if "export_svg" in sig.parameters or has_kwargs:
             kwargs["export_svg"] = export_svg
+        if "layer" in sig.parameters or has_kwargs:
+            kwargs["layer"] = layer
             
         result = service.run_text_generation(**kwargs)
         output_dir = Path(result["output_dir"]).as_posix()
@@ -109,6 +112,8 @@ def generate(
         kwargs["style_name"] = style_name
     if "export_svg" in sig.parameters or has_kwargs:
         kwargs["export_svg"] = export_svg
+    if "layer" in sig.parameters or has_kwargs:
+        kwargs["layer"] = layer
         
     result = service.run_sketch_generation(**kwargs)
     output_dir = Path(result["output_dir"]).as_posix()

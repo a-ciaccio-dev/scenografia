@@ -59,6 +59,20 @@ def render_sidebar_settings(style_names: list[str]) -> dict[str, Any]:
             help="Suddividi il disegno in più pannelli o parti verticali",
         )
 
+        # Theatrical Depth Layer Selector
+        layer = st.selectbox(
+            "Piano di Profondità Scenica",
+            options=["all", "background", "midground", "foreground"],
+            format_func=lambda x: {
+                "all": "Tutti i Piani (Scena Unitaria)",
+                "background": "Fondale (Backdrop / Orizzonte)",
+                "midground": "Mezzo Piano (Praticabili / Architetture)",
+                "foreground": "Primo Piano (Quinte / Cieli / Proscenio)",
+            }.get(x, x),
+            index=0,
+            help="Isola specifici elementi di profondità teatrale per la composizione o stampa a strati.",
+        )
+
         # SVG Export Option
         export_svg = st.checkbox(
             "Esporta SVG Vettoriale",
@@ -99,6 +113,7 @@ def render_sidebar_settings(style_names: list[str]) -> dict[str, Any]:
         "orientation": orientation,
         "selected_style_name": selected_style_name,
         "division": division,
+        "layer": layer,
         "export_svg": export_svg,
         "model_override": model_override,
     }

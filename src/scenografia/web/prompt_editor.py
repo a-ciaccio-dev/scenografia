@@ -17,6 +17,7 @@ def render_text_mode_inputs(
     division: str,
     selected_style_name: str,
     model_override: Optional[str] = None,
+    layer: Optional[str] = "all",
 ) -> dict[str, Any]:
     """
     Render text prompt inputs, enhancer controls, live preview, and the generate trigger button.
@@ -79,6 +80,7 @@ def render_text_mode_inputs(
                         model_id=model_override if model_override else None,
                         image_bytes=passed_img_bytes,
                         division=division,
+                        layer=layer,
                     )
                     st.session_state.enhanced_prompt = enhanced
                 except Exception as e:

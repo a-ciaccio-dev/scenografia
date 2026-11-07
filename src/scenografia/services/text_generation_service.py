@@ -46,8 +46,16 @@ class TextGenerationService:
         progress_callback: Optional[Callable[[str], None]] = None,
         input_image_bytes: Optional[bytes] = None,
         export_svg: bool = False,
+        layer: Optional[str] = "all",
     ) -> Dict[str, Any]:
         """Execute the text-mode generation pipeline end to end."""
+        from scenografia.tools.prompt_templates import get_depth_layer_instruction
+
+        if layer and layer.lower() != "all":
+            layer_instr = get_depth_layer_instruction(layer)
+            if layer_instr:
+                prompt = f"{prompt}\nScenic Depth Layer: {layer_instr}"
+
         if progress_callback:
             progress_callback("brief")
         normalized_mode = mode if isinstance(mode, GenerationMode) else GenerationMode(mode)

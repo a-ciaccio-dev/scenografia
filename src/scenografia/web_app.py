@@ -58,6 +58,7 @@ def run_text_generation(
     input_image_bytes: Optional[bytes] = None,
     division: Optional[str] = "Nessuna",
     export_svg: bool = False,
+    layer: Optional[str] = "all",
 ) -> dict:
     """
     Wrapper for TextGenerationService.run_text_generation().
@@ -91,6 +92,7 @@ def run_text_generation(
             progress_callback=progress_callback,
             input_image_bytes=input_image_bytes,
             export_svg=export_svg,
+            layer=layer,
         )
         logger.info(f"Text generation completata con successo. Risultati in: {result.get('output_dir')}")
         return result
@@ -109,6 +111,7 @@ def run_sketch_generation(
     progress_callback: Optional[Callable[[str], None]] = None,
     input_image_bytes: Optional[bytes] = None,
     export_svg: bool = False,
+    layer: Optional[str] = "all",
 ) -> dict:
     """
     Wrapper for SketchGenerationService.run_sketch_generation().
@@ -132,6 +135,7 @@ def run_sketch_generation(
             progress_callback=progress_callback,
             input_image_bytes=input_image_bytes,
             export_svg=export_svg,
+            layer=layer,
         )
         logger.info(f"Sketch generation completata con successo. Risultati in: {result.get('output_dir')}")
         return result
@@ -260,6 +264,7 @@ def main():
         division=sidebar_cfg["division"],
         selected_style_name=sidebar_cfg["selected_style_name"],
         model_override=sidebar_cfg["model_override"],
+        layer=sidebar_cfg.get("layer", "all"),
     )
 
     if editor_state["generate_clicked"]:
@@ -281,6 +286,7 @@ def main():
                         input_image_bytes=passed_layout_bytes,
                         division=sidebar_cfg["division"],
                         export_svg=sidebar_cfg.get("export_svg", False),
+                        layer=sidebar_cfg.get("layer", "all"),
                     )
                 status_placeholder.empty()
                 st.success("✅ Generazione completata!")

@@ -41,14 +41,15 @@ def test_render_sidebar_settings(mock_header, mock_expander, mock_text_area, moc
     from scenografia.web.sidebar import render_sidebar_settings
 
     mock_checkbox.return_value = True
-    # Provide return values for selectbox calls: mode, orientation, style, division
-    mock_selectbox.side_effect = ["standard", "landscape", "Default", "Nessuna"]
+    # Provide return values for selectbox calls: mode, orientation, style, division, layer
+    mock_selectbox.side_effect = ["standard", "landscape", "Default", "Nessuna", "background"]
 
     cfg = render_sidebar_settings(["Default", "Minimal"])
     assert cfg["mode"] == "standard"
     assert cfg["orientation"] == "landscape"
     assert cfg["selected_style_name"] == "Default"
     assert cfg["division"] == "Nessuna"
+    assert cfg["layer"] == "background"
     assert cfg["export_svg"] is True
     assert cfg["model_override"] is None
 
