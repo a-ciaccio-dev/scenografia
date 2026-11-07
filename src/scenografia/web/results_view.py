@@ -29,6 +29,8 @@ def on_regenerate(
     selected_style: str,
     new_mode_key: str,
     additions_key: str,
+    export_svg: bool = False,
+    layer: Optional[str] = "all",
 ) -> None:
     """Callback per il tasto di rigenerazione: unisce il prompt originale con le modifiche e avvia la generazione."""
     import streamlit as st
@@ -68,6 +70,8 @@ def on_regenerate(
                 disable_ai_refinement=False,
                 style_name=selected_style,
                 input_image_bytes=prev_image_bytes,
+                export_svg=export_svg,
+                layer=layer,
             )
             st.session_state.active_generation = {
                 "output_dir": result.get("output_dir"),
@@ -84,6 +88,8 @@ def on_regenerate(
                 model=None,
                 style=selected_style,
                 input_image_bytes=prev_image_bytes,
+                export_svg=export_svg,
+                layer=layer,
             )
             st.session_state.active_generation = {
                 "output_dir": result.get("output_dir"),
@@ -140,6 +146,8 @@ def display_generation_results(
                 orientation_val = "landscape"
                 input_type = "text"
                 selected_style = "Default"
+                used_layer = "all"
+                export_svg = (Path(output_dir) / "scene_vector.svg").exists()
 
                 metadata_path = Path(output_dir) / "generation_response.json"
                 if metadata_path.exists():
@@ -152,6 +160,7 @@ def display_generation_results(
                             orientation_val = raw_orientation.value if hasattr(raw_orientation, "value") else str(raw_orientation)
                             input_type = meta_data.get("input_type", "text")
                             selected_style = meta_data.get("style_name", "Default")
+                            used_layer = meta_data.get("layer") or (meta_data.get("brief", {}).get("layer") if isinstance(meta_data.get("brief"), dict) else "all") or "all"
                     except Exception:
                         pass
 
@@ -204,6 +213,8 @@ def display_generation_results(
                             selected_style,
                             f"select_new_mode_{output_dir}",
                             f"prompt_additions_{output_dir}",
+                            export_svg,
+                            used_layer,
                         ),
                     )
 
@@ -222,6 +233,8 @@ def display_generation_results(
                             selected_style,
                             f"select_new_mode_{output_dir}",
                             f"prompt_additions_{output_dir}",
+                            export_svg,
+                            used_layer,
                         ),
                     )
             else:

@@ -120,3 +120,40 @@ def test_on_regenerate_text(tmp_path):
 
             mock_run_text.assert_called_once()
             assert "more lights" in mock_run_text.call_args.kwargs["prompt"]
+
+
+def test_on_regenerate_preserves_layer_and_export_svg(tmp_path):
+    """Verify on_regenerate passes layer and export_svg to the service."""
+    from unittest.mock import patch
+    from scenografia.web.results_view import on_regenerate
+
+    mock_state = MockSessionState({"select_mode": "standard", "prompt_add": "add banner"})
+    with patch("streamlit.session_state", mock_state):
+        with patch("scenografia.services.text_generation_service.TextGenerationService.run_text_generation") as mock_run_text:
+            test_img = tmp_path / "final.png"
+            test_img.write_bytes(b"\x89PNG\r\n\x1a\n")
+
+            mock_run_text.return_value = {
+                "output_dir": tmp_path,
+                "image_path": test_img,
+                "prompt_path": tmp_path / "prompt.txt",
+            }
+
+            on_regenerate(
+                output_dir=tmp_path,
+                image_path_obj=test_img,
+                sketch_path=None,
+                original_prompt="Palace hall",
+                orientation_val="landscape",
+                input_type="text",
+                selected_style="Default",
+                new_mode_key="select_mode",
+                additions_key="prompt_add",
+                export_svg=True,
+                layer="foreground",
+            )
+
+            mock_run_text.assert_called_once()
+            kwargs = mock_run_text.call_args.kwargs
+            assert kwargs["export_svg"] is True
+            assert kwargs["layer"] == "foreground"
