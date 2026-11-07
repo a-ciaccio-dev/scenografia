@@ -256,3 +256,32 @@ class TestLatestOutputDirectory:
                 assert latest.exists()
             finally:
                 Config.APP_OUTPUT_DIR = original
+
+
+def test_create_output_directory_anti_collision(tmp_path, monkeypatch):
+    """Verify that creating two directories with identical timestamp/slug uses collision suffix."""
+    monkeypatch.setattr("scenografia.config.Config.APP_OUTPUT_DIR", str(tmp_path))
+
+    dir1 = OutputManager.create_output_directory("ballroom")
+    dir2 = OutputManager.create_output_directory("ballroom")
+
+    assert dir1.exists()
+    assert dir2.exists()
+    assert dir1 != dir2
+    assert dir2.name.startswith(dir1.name) or dir1.name.startswith(dir2.name) or "_1" in dir2.name
+
+
+def test_list_recent_runs_backward_compatibility(tmp_path):
+    """Verify list_recent_runs detects both legacy 4-digit and new 6-digit timestamp directories."""
+    from scenografia.web_helpers import list_recent_runs
+
+    legacy_dir = tmp_path / "2026-06-25_1200_run-legacy"
+    legacy_dir.mkdir()
+    new_dir = tmp_path / "2026-06-25_120035_run-new"
+    new_dir.mkdir()
+
+    runs = list_recent_runs(tmp_path)
+    run_names = [r.name for r in runs]
+
+    assert "2026-06-25_1200_run-legacy" in run_names
+    assert "2026-06-25_120035_run-new" in run_names

@@ -164,14 +164,20 @@ class OutputManager:
         Returns:
             Path to created output directory
         """
-        timestamp = datetime.now().strftime("%Y-%m-%d_%H%M")
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
         scene_slug = slugify(scene_name)
         if not scene_slug:
             scene_slug = "untitled"
         
         dir_name = f"{timestamp}_{scene_slug}"
-        output_path = Path(Config.APP_OUTPUT_DIR) / dir_name
+        output_root = Path(Config.APP_OUTPUT_DIR)
+        output_path = output_root / dir_name
         
+        counter = 1
+        while output_path.exists():
+            output_path = output_root / f"{dir_name}_{counter}"
+            counter += 1
+            
         output_path.mkdir(parents=True, exist_ok=True)
         return output_path
     

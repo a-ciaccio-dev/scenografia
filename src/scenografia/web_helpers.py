@@ -66,7 +66,7 @@ def list_recent_runs(output_dir: str | Path, n: int = 10) -> list[Path]:
     # Find all subdirectories matching run pattern (YYYY-MM-DD_HHMM_*)
     runs = [
         d for d in output_path.iterdir()
-        if d.is_dir() and re.match(r"^\d{4}-\d{2}-\d{2}_\d{4}_", d.name)
+        if d.is_dir() and re.match(r"^\d{4}-\d{2}-\d{2}_\d{4,6}_", d.name)
     ]
     
     # Sort by name descending (newest first)
