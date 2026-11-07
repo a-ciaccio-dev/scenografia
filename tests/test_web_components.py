@@ -30,15 +30,17 @@ def test_web_package_exports():
     assert hasattr(web, "on_regenerate")
 
 
+@patch("streamlit.checkbox")
 @patch("streamlit.sidebar")
 @patch("streamlit.selectbox")
 @patch("streamlit.text_area")
 @patch("streamlit.expander")
 @patch("streamlit.header")
-def test_render_sidebar_settings(mock_header, mock_expander, mock_text_area, mock_selectbox, mock_sidebar):
+def test_render_sidebar_settings(mock_header, mock_expander, mock_text_area, mock_selectbox, mock_sidebar, mock_checkbox):
     """Test sidebar component rendering and configuration extraction."""
     from scenografia.web.sidebar import render_sidebar_settings
 
+    mock_checkbox.return_value = True
     # Provide return values for selectbox calls: mode, orientation, style, division
     mock_selectbox.side_effect = ["standard", "landscape", "Default", "Nessuna"]
 
@@ -47,6 +49,7 @@ def test_render_sidebar_settings(mock_header, mock_expander, mock_text_area, moc
     assert cfg["orientation"] == "landscape"
     assert cfg["selected_style_name"] == "Default"
     assert cfg["division"] == "Nessuna"
+    assert cfg["export_svg"] is True
     assert cfg["model_override"] is None
 
 

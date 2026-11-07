@@ -167,6 +167,16 @@ def display_generation_results(
                             file_name=image_path_obj.name,
                             mime="image/png",
                         )
+                    svg_file = Path(output_dir) / "scene_vector.svg"
+                    if svg_file.exists():
+                        with open(svg_file, "r", encoding="utf-8") as f_svg:
+                            st.download_button(
+                                label="📐 Scarica SVG Vettoriale",
+                                data=f_svg.read(),
+                                file_name=svg_file.name,
+                                mime="image/svg+xml",
+                                key=f"dl_svg_{output_dir}",
+                            )
 
                 with col_sel:
                     selected_new_mode = st.selectbox(

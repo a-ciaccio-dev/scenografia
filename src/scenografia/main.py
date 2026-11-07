@@ -44,6 +44,7 @@ def generate(
     orientation: Optional[str] = typer.Option(None, "--orientation", help="Output orientation."),
     model: Optional[str] = typer.Option(None, "--model", help="Optional model override."),
     disable_ai_refinement: bool = typer.Option(False, "--disable-ai-refinement", help="Disable optional AI refinement for sketch mode."),
+    export_svg: bool = typer.Option(False, "--export-svg", help="Export vector SVG of the generated scene."),
 ) -> None:
     """Generate a scenic design from text or sketch."""
     if bool(prompt) == bool(sketch):
@@ -57,18 +58,23 @@ def generate(
         
         import inspect
         sig = inspect.signature(service.run_text_generation)
+        has_kwargs = any(p.kind == inspect.Parameter.VAR_KEYWORD for p in sig.parameters.values())
         kwargs = {
             "prompt": prompt,
             "mode": mode,
             "orientation": resolved_orientation,
             "model": model,
         }
-        if "style" in sig.parameters:
+        if "style" in sig.parameters or has_kwargs:
             kwargs["style"] = style_name
+        if "export_svg" in sig.parameters or has_kwargs:
+            kwargs["export_svg"] = export_svg
             
         result = service.run_text_generation(**kwargs)
         output_dir = Path(result["output_dir"]).as_posix()
         typer.echo(f"Generated scenic design in {output_dir}")
+        if "svg_path" in result:
+            typer.echo(f"Vector SVG saved to {Path(result['svg_path']).as_posix()}")
         return
 
     if not style:
@@ -90,6 +96,7 @@ def generate(
     
     import inspect
     sig = inspect.signature(service.run_sketch_generation)
+    has_kwargs = any(p.kind == inspect.Parameter.VAR_KEYWORD for p in sig.parameters.values())
     kwargs = {
         "sketch_path": sketch,
         "style": style_guidance,
@@ -98,14 +105,18 @@ def generate(
         "model": model,
         "disable_ai_refinement": disable_ai_refinement,
     }
-    if "style_name" in sig.parameters:
+    if "style_name" in sig.parameters or has_kwargs:
         kwargs["style_name"] = style_name
+    if "export_svg" in sig.parameters or has_kwargs:
+        kwargs["export_svg"] = export_svg
         
     result = service.run_sketch_generation(**kwargs)
     output_dir = Path(result["output_dir"]).as_posix()
     processed_sketch = Path(result["processed_sketch_path"]).as_posix()
     typer.echo(f"Generated scenic design in {output_dir}")
     typer.echo(f"Processed sketch saved to {processed_sketch}")
+    if "svg_path" in result:
+        typer.echo(f"Vector SVG saved to {Path(result['svg_path']).as_posix()}")
 
 
 @app.command()

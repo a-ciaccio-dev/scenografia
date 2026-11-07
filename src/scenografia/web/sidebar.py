@@ -59,6 +59,13 @@ def render_sidebar_settings(style_names: list[str]) -> dict[str, Any]:
             help="Suddividi il disegno in più pannelli o parti verticali",
         )
 
+        # SVG Export Option
+        export_svg = st.checkbox(
+            "Esporta SVG Vettoriale",
+            value=False,
+            help="Genera automaticamente un file SVG vettoriale scalabile insieme al PNG.",
+        )
+
         # Read-only BASE_PROMPT display
         with st.expander("Prompt base SVG-safe"):
             st.text_area("BASE_PROMPT (sola lettura)", BASE_PROMPT, height=200, disabled=True)
@@ -92,5 +99,6 @@ def render_sidebar_settings(style_names: list[str]) -> dict[str, Any]:
         "orientation": orientation,
         "selected_style_name": selected_style_name,
         "division": division,
+        "export_svg": export_svg,
         "model_override": model_override,
     }

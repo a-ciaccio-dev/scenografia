@@ -45,6 +45,7 @@ class TextGenerationService:
         style: Optional[str] = "Default",
         progress_callback: Optional[Callable[[str], None]] = None,
         input_image_bytes: Optional[bytes] = None,
+        export_svg: bool = False,
     ) -> Dict[str, Any]:
         """Execute the text-mode generation pipeline end to end."""
         if progress_callback:
@@ -107,10 +108,16 @@ class TextGenerationService:
         )
         if progress_callback:
             progress_callback("persist")
-        return self.output_manager.persist_text_run(
-            brief=brief,
-            prompt_package=prompt_package,
-            response=response,
-            validation_report=validation_report,
-            metadata=metadata,
-        )
+
+        import inspect
+        persist_sig = inspect.signature(self.output_manager.persist_text_run)
+        persist_kwargs = {
+            "brief": brief,
+            "prompt_package": prompt_package,
+            "response": response,
+            "validation_report": validation_report,
+            "metadata": metadata,
+        }
+        if "export_svg" in persist_sig.parameters:
+            persist_kwargs["export_svg"] = export_svg
+        return self.output_manager.persist_text_run(**persist_kwargs)

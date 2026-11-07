@@ -57,6 +57,7 @@ def run_text_generation(
     progress_callback: Optional[Callable[[str], None]] = None,
     input_image_bytes: Optional[bytes] = None,
     division: Optional[str] = "Nessuna",
+    export_svg: bool = False,
 ) -> dict:
     """
     Wrapper for TextGenerationService.run_text_generation().
@@ -89,6 +90,7 @@ def run_text_generation(
             style=style,
             progress_callback=progress_callback,
             input_image_bytes=input_image_bytes,
+            export_svg=export_svg,
         )
         logger.info(f"Text generation completata con successo. Risultati in: {result.get('output_dir')}")
         return result
@@ -106,6 +108,7 @@ def run_sketch_generation(
     style_name: Optional[str] = "Default",
     progress_callback: Optional[Callable[[str], None]] = None,
     input_image_bytes: Optional[bytes] = None,
+    export_svg: bool = False,
 ) -> dict:
     """
     Wrapper for SketchGenerationService.run_sketch_generation().
@@ -128,6 +131,7 @@ def run_sketch_generation(
             style_name=style_name,
             progress_callback=progress_callback,
             input_image_bytes=input_image_bytes,
+            export_svg=export_svg,
         )
         logger.info(f"Sketch generation completata con successo. Risultati in: {result.get('output_dir')}")
         return result
@@ -276,6 +280,7 @@ def main():
                         progress_callback=update_progress,
                         input_image_bytes=passed_layout_bytes,
                         division=sidebar_cfg["division"],
+                        export_svg=sidebar_cfg.get("export_svg", False),
                     )
                 status_placeholder.empty()
                 st.success("✅ Generazione completata!")

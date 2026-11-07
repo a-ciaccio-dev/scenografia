@@ -52,6 +52,7 @@ class OutputManager:
         metadata: GenerationMetadata,
         output_dir: Optional[Path] = None,
         processed_sketch_path: Optional[Path] = None,
+        export_svg: bool = False,
     ) -> Dict[str, Path]:
         """Persist artifacts for a text-mode generation run."""
         output_dir = output_dir or OutputManager.create_output_directory(brief["scene_description"])
@@ -80,6 +81,16 @@ class OutputManager:
             processed_sketch_path=processed_sketch_path,
         )
         artifacts["style.json"] = style_path
+
+        # Generate SVG vector export if requested or if mode is vector-ready
+        svg_path: Optional[Path] = None
+        gen_mode_val = metadata.generation_mode.value if hasattr(metadata.generation_mode, "value") else str(metadata.generation_mode)
+        if export_svg or gen_mode_val == "vector-ready":
+            try:
+                svg_path = OutputManager.save_svg(output_dir, artifacts["final.png"])
+                artifacts["scene_vector.svg"] = svg_path
+            except Exception:
+                pass
         
         finalized_report = OutputManager.finalize_validation_report(output_dir, validation_report)
         artifacts["validation_report.json"] = OutputManager.save_validation_report(
@@ -94,7 +105,7 @@ class OutputManager:
             metadata,
         )
 
-        return {
+        result_dict = {
             "output_dir": output_dir,
             "image_path": artifacts["final.png"],
             "prompt_path": artifacts["prompt.txt"],
@@ -104,6 +115,23 @@ class OutputManager:
             "validation_path": artifacts["validation_report.json"],
             "style_path": style_path,
         }
+        if svg_path:
+            result_dict["svg_path"] = svg_path
+        return result_dict
+
+    @staticmethod
+    def save_svg(
+        output_dir: Path,
+        image_path: Path,
+        mode: str = "color",
+        filename: str = "scene_vector.svg",
+    ) -> Path:
+        """Vectorize a raster image and save as SVG in the output directory."""
+        from scenografia.tools.svg_vectorizer import SvgVectorizer
+
+        vectorizer = SvgVectorizer()
+        svg_path = output_dir / filename
+        return vectorizer.vectorize_image(image_path, output_svg_path=svg_path, mode=mode)
 
     @staticmethod
     def finalize_validation_report(
