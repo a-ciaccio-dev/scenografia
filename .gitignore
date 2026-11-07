@@ -53,6 +53,7 @@ test_results*.txt
 *.tmp
 *.log
 *.pid
+logs/
 
 # Application-specific
 output/

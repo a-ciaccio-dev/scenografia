@@ -9,16 +9,9 @@ from pathlib import Path
 from typing import Optional, Callable
 import logging
 
-# Configure logging to console and a local log file
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler("scenografia_app.log", encoding="utf-8")
-    ]
-)
-logger = logging.getLogger("scenografia_web")
+from scenografia.logger import setup_logger
+
+logger = setup_logger("scenografia_web")
 
 
 def load_config() -> tuple[bool, str]:
