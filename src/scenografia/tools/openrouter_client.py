@@ -7,6 +7,7 @@ request/response mapping, and orientation-aware image configuration.
 
 import httpx
 import base64
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type, retry_if_result
 from typing import Optional, Dict, Any
 from ..schemas.generation_schema import (
     ImageGenerationResponse,
@@ -48,6 +49,19 @@ class OpenRouterClient:
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Context manager exit."""
         self.close()
+
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=0.1, min=0.05, max=1.0),
+        retry=(
+            retry_if_exception_type((httpx.TimeoutException, httpx.NetworkError))
+            | retry_if_result(lambda r: getattr(r, "status_code", 200) in (429, 502, 503, 504))
+        ),
+        reraise=True,
+    )
+    def _post_with_retry(self, url: str, json: dict, timeout: Optional[float] = None) -> httpx.Response:
+        """Execute POST request with automatic retry for transient errors and rate limits."""
+        return self.client.post(url, json=json, timeout=timeout or Config.get_timeout())
     
     def generate_image(
         self,
@@ -113,11 +127,11 @@ class OpenRouterClient:
                 "stream": False
             }
             
-            # Make request to chat/completions endpoint
-            response = self.client.post(
+            # Make request to chat/completions endpoint with retry
+            response = self._post_with_retry(
                 f"{self.base_url}/chat/completions",
                 json=payload,
-                timeout=60.0
+                timeout=Config.get_timeout(),
             )
             
             # Handle HTTP errors
@@ -353,10 +367,10 @@ class OpenRouterClient:
                 "stream": False
             }
             
-            response = self.client.post(
+            response = self._post_with_retry(
                 f"{self.base_url}/chat/completions",
                 json=payload,
-                timeout=45.0
+                timeout=Config.get_timeout(),
             )
             
             if response.status_code != 200:

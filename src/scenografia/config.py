@@ -31,6 +31,7 @@ class Config:
     # OpenRouter image generation API configuration
     OPENROUTER_API_KEY: str
     OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1"
+    OPENROUTER_TIMEOUT: float = 60.0
     
     # Optional enhancer model
     OPENROUTER_ENHANCER_MODEL: str = "google/gemini-2.5-flash"
@@ -63,6 +64,16 @@ class Config:
             "OPENROUTER_BASE_URL",
             "https://openrouter.ai/api/v1"
         )
+        
+        # Optional: Timeout
+        timeout_env = os.getenv("OPENROUTER_TIMEOUT")
+        if timeout_env:
+            try:
+                cls.OPENROUTER_TIMEOUT = float(timeout_env)
+            except ValueError:
+                cls.OPENROUTER_TIMEOUT = 60.0
+        else:
+            cls.OPENROUTER_TIMEOUT = 60.0
         
         # Optional: Enhancer Model
         cls.OPENROUTER_ENHANCER_MODEL = os.getenv(
@@ -99,8 +110,12 @@ class Config:
             mode: GenerationMode value
             
         Returns:
-            Model ID if configured, None otherwise
+            Model ID string or None if not configured
         """
+        # Ensure mapping is initialized
+        if not cls._model_mapping:
+            cls._initialize_model_mapping()
+        
         mode_str = mode.value if isinstance(mode, GenerationMode) else str(mode)
         return cls._model_mapping.get(mode_str)
     
@@ -136,6 +151,23 @@ class Config:
             GenerationMode.VECTOR_READY: "google/gemini-2.5-flash-image",
         }
         return fallbacks.get(mode, fallbacks[GenerationMode.STANDARD])
+
+    @classmethod
+    def get_timeout(cls) -> float:
+        """Get the timeout in seconds for OpenRouter API requests."""
+        return getattr(cls, "OPENROUTER_TIMEOUT", 60.0)
+    
+    @classmethod
+    def get_all_mappings(cls) -> Dict[str, Optional[str]]:
+        """
+        Get all mode-to-model mappings.
+        
+        Returns:
+            Dictionary mapping mode names to model IDs
+        """
+        if not cls._model_mapping:
+            cls._initialize_model_mapping()
+        return cls._model_mapping.copy()
     
     @classmethod
     def validate(cls) -> bool:
@@ -145,7 +177,7 @@ class Config:
         Returns:
             True if valid, raises exception otherwise
         """
-        if not cls.OPENROUTER_API_KEY:
+        if not hasattr(cls, "OPENROUTER_API_KEY") or not cls.OPENROUTER_API_KEY:
             raise ValueError("OPENROUTER_API_KEY not set")
         
         # Ensure output directory exists
