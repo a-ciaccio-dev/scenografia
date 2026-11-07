@@ -48,6 +48,7 @@ class SvgVectorizer:
         image_path: Path | str,
         output_svg_path: Optional[Path | str] = None,
         mode: str = "color",
+        layer: Optional[str] = "all",
     ) -> Path:
         """
         Vectorize an image file and save as an SVG document.
@@ -56,6 +57,7 @@ class SvgVectorizer:
             image_path: Path to the input raster image.
             output_svg_path: Optional output path. Defaults to same name with .svg extension.
             mode: Vectorization mode ("color", "monochrome", or "lineart").
+            layer: Theatrical scenic depth layer ("all", "background", "midground", "foreground").
 
         Returns:
             Path to the generated .svg file.
@@ -71,7 +73,8 @@ class SvgVectorizer:
 
         out_path.parent.mkdir(parents=True, exist_ok=True)
 
-        logger.info(f"Avvio vettorizzazione di '{in_path}' in modalità '{mode}'...")
+        layer_slug = (layer.strip().lower() if layer else "all")
+        logger.info(f"Avvio vettorizzazione di '{in_path}' in modalità '{mode}' (layer: {layer_slug})...")
 
         # Read image
         img = cv2.imread(str(in_path))
@@ -83,9 +86,9 @@ class SvgVectorizer:
         height, width = img.shape[:2]
 
         if mode in ("monochrome", "lineart", "bw"):
-            svg_content = self._vectorize_monochrome(img, width, height)
+            svg_content = self._vectorize_monochrome(img, width, height, layer_slug=layer_slug)
         else:
-            svg_content = self._vectorize_color(img, width, height)
+            svg_content = self._vectorize_color(img, width, height, layer_slug=layer_slug)
 
         out_path.write_text(svg_content, encoding="utf-8")
         logger.info(f"Vettorizzazione completata. SVG salvato in: {out_path} ({len(svg_content)} bytes)")
@@ -111,7 +114,7 @@ class SvgVectorizer:
         commands.append("Z")
         return " ".join(commands)
 
-    def _vectorize_monochrome(self, img: np.ndarray, width: int, height: int) -> str:
+    def _vectorize_monochrome(self, img: np.ndarray, width: int, height: int, layer_slug: str = "all") -> str:
         """Vectorize image as high-contrast monochrome line-art."""
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         # Adaptive or Otsu threshold
@@ -125,18 +128,20 @@ class SvgVectorizer:
             if area >= self.min_contour_area:
                 d = self._contour_to_svg_path(cnt)
                 if d:
-                    svg_paths.append(f'  <path d="{d}" fill="#111111" stroke="none" />')
+                    svg_paths.append(f'    <path d="{d}" fill="#111111" stroke="none" />')
 
         paths_str = "\n".join(svg_paths)
         return (
             f'<?xml version="1.0" encoding="UTF-8"?>\n'
             f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}">\n'
-            f'  <rect width="100%" height="100%" fill="#ffffff" />\n'
+            f'  <g id="scenic-layer-{layer_slug}" data-layer="{layer_slug}">\n'
+            f'    <rect width="100%" height="100%" fill="#ffffff" />\n'
             f'{paths_str}\n'
+            f'  </g>\n'
             f'</svg>'
         )
 
-    def _vectorize_color(self, img: np.ndarray, width: int, height: int) -> str:
+    def _vectorize_color(self, img: np.ndarray, width: int, height: int, layer_slug: str = "all") -> str:
         """Vectorize image using K-Means color quantization and multi-layer contouring."""
         # Reshape image pixels for k-means
         data = img.reshape((-1, 3)).astype(np.float32)
@@ -192,10 +197,12 @@ class SvgVectorizer:
                     if d:
                         svg_elements.append(f'  <path d="{d}" fill="{hex_color}" stroke="none" />')
 
-        elements_str = "\n".join(svg_elements)
+        elements_str = "\n".join(f"  {el}" for el in svg_elements)
         return (
             f'<?xml version="1.0" encoding="UTF-8"?>\n'
             f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}">\n'
+            f'  <g id="scenic-layer-{layer_slug}" data-layer="{layer_slug}">\n'
             f'{elements_str}\n'
+            f'  </g>\n'
             f'</svg>'
         )

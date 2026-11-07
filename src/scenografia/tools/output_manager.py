@@ -87,7 +87,8 @@ class OutputManager:
         gen_mode_val = metadata.generation_mode.value if hasattr(metadata.generation_mode, "value") else str(metadata.generation_mode)
         if export_svg or gen_mode_val == "vector-ready":
             try:
-                svg_path = OutputManager.save_svg(output_dir, artifacts["final.png"])
+                layer_val = getattr(metadata, "layer", None) or (brief.get("layer") if hasattr(brief, "get") else "all") or "all"
+                svg_path = OutputManager.save_svg(output_dir, artifacts["final.png"], layer=layer_val)
                 artifacts["scene_vector.svg"] = svg_path
             except Exception:
                 pass
@@ -125,13 +126,14 @@ class OutputManager:
         image_path: Path,
         mode: str = "color",
         filename: str = "scene_vector.svg",
+        layer: Optional[str] = "all",
     ) -> Path:
         """Vectorize a raster image and save as SVG in the output directory."""
         from scenografia.tools.svg_vectorizer import SvgVectorizer
 
         vectorizer = SvgVectorizer()
         svg_path = output_dir / filename
-        return vectorizer.vectorize_image(image_path, output_svg_path=svg_path, mode=mode)
+        return vectorizer.vectorize_image(image_path, output_svg_path=svg_path, mode=mode, layer=layer)
 
     @staticmethod
     def finalize_validation_report(
