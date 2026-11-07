@@ -2,8 +2,10 @@
 
 import json
 from pathlib import Path
+from typing import Union, Dict, Any, List
 
 from scenografia.schemas.generation_schema import Orientation
+from scenografia.schemas.brief_schema import StructuredBrief, PromptPackage
 from scenografia.schemas.validation_schema import ValidationReport
 from scenografia.tools.style_validator import StyleValidator
 
@@ -11,7 +13,12 @@ from scenografia.tools.style_validator import StyleValidator
 class StyleComplianceAgent:
     """Validate scenic style compliance for generated runs."""
 
-    def validate_text_run(self, brief: dict, prompt_package: dict, response) -> ValidationReport:
+    def validate_text_run(
+        self,
+        brief: Union[StructuredBrief, Dict[str, Any]],
+        prompt_package: Union[PromptPackage, Dict[str, Any]],
+        response: Any
+    ) -> ValidationReport:
         """Create a preliminary validation report before artifacts are finalized."""
         style_contract_applied, style_issues = StyleValidator.validate_style_contract(
             prompt_package["final_prompt"]

@@ -8,11 +8,12 @@ generation artifacts for reproducibility and traceability.
 import json
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Union
 import re
 from PIL import Image
 from ..config import Config
 from ..schemas.generation_schema import Orientation
+from ..schemas.brief_schema import StructuredBrief, PromptPackage
 from ..schemas.validation_schema import GenerationMetadata, ValidationReport
 from .style_validator import StyleValidator
 
@@ -44,8 +45,8 @@ class OutputManager:
 
     @staticmethod
     def persist_text_run(
-        brief: Dict[str, Any],
-        prompt_package: Dict[str, Any],
+        brief: Union[StructuredBrief, Dict[str, Any]],
+        prompt_package: Union[PromptPackage, Dict[str, Any]],
         response: Any,
         validation_report: ValidationReport,
         metadata: GenerationMetadata,
@@ -243,7 +244,7 @@ class OutputManager:
         final_image_bytes: bytes,
         final_prompt: str,
         negative_prompt: str,
-        brief_dict: Dict[str, Any],
+        brief_dict: Union[StructuredBrief, Dict[str, Any]],
         metadata: GenerationMetadata,
         processed_sketch_path: Optional[Path] = None
     ) -> Dict[str, Path]:

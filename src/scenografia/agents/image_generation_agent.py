@@ -9,6 +9,8 @@ from scenografia.agents.sketch_interpreter_agent import SketchInterpreterAgent
 from scenografia.agents.style_compliance_agent import StyleComplianceAgent
 from scenografia.config import Config
 from scenografia.schemas.generation_schema import GenerationMode, GenerationRequest, Orientation
+from scenografia.schemas.brief_schema import StructuredBrief, PromptPackage
+from typing import Union
 from scenografia.schemas.validation_schema import GenerationMetadata
 from scenografia.tools.openrouter_client import OpenRouterClient
 from scenografia.tools.output_manager import OutputManager
@@ -20,7 +22,7 @@ class ImageGenerationAgent:
     def __init__(self, client: OpenRouterClient | None = None):
         self.client = client or OpenRouterClient()
 
-    def generate(self, request: GenerationRequest, prompt_package: dict, brief: dict, input_image_bytes: bytes | None = None):
+    def generate(self, request: GenerationRequest, prompt_package: Union[PromptPackage, dict], brief: Union[StructuredBrief, dict], input_image_bytes: bytes | None = None):
         """Send the final prompt package to OpenRouter."""
         model_id = Config.get_model_id(request.mode, request.model_id)
         response = self.client.generate_image(
