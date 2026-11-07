@@ -1,6 +1,7 @@
 """Generation orchestration for text and sketch workflows."""
 
 from pathlib import Path
+from collections.abc import Callable
 
 from scenografia.agents.brief_agent import BriefAgent
 from scenografia.agents.prompt_engineer_agent import PromptEngineerAgent
@@ -72,7 +73,7 @@ class TextGenerationService:
         orientation: Orientation,
         model: str | None,
         style: str | None = "Default",
-        progress_callback: callable = None,
+        progress_callback: Callable[[str], None] | None = None,
         input_image_bytes: bytes | None = None,
     ) -> dict:
         """Execute the text-mode generation pipeline end to end."""
@@ -180,7 +181,7 @@ class SketchGenerationService:
         model: str | None,
         disable_ai_refinement: bool,
         style_name: str | None = "Default",
-        progress_callback: callable = None,
+        progress_callback: Callable[[str], None] | None = None,
         input_image_bytes: bytes | None = None,
     ) -> dict:
         """Execute the sketch-mode generation pipeline end to end."""

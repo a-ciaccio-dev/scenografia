@@ -6,7 +6,7 @@ or sketches. Reuses the existing pipeline agents and services.
 """
 
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Callable
 import logging
 
 # Configure logging to console and a local log file
@@ -46,7 +46,7 @@ def load_config() -> tuple[bool, str]:
 
 
 def run_text_generation(
-    prompt: str, mode: str, orientation: str, model: Optional[str] = None, style: Optional[str] = "Default", progress_callback: Optional[callable] = None, input_image_bytes: Optional[bytes] = None, division: Optional[str] = "Nessuna"
+    prompt: str, mode: str, orientation: str, model: Optional[str] = None, style: Optional[str] = "Default", progress_callback: Optional[Callable[[str], None]] = None, input_image_bytes: Optional[bytes] = None, division: Optional[str] = "Nessuna"
 ) -> dict:
     """
     Wrapper for TextGenerationService.run_text_generation().
@@ -101,7 +101,7 @@ def run_text_generation(
 
 
 def run_sketch_generation(
-    sketch_path: str, style: str, mode: str, orientation: str, model: Optional[str] = None, style_name: Optional[str] = "Default", progress_callback: Optional[callable] = None, input_image_bytes: Optional[bytes] = None
+    sketch_path: str, style: str, mode: str, orientation: str, model: Optional[str] = None, style_name: Optional[str] = "Default", progress_callback: Optional[Callable[[str], None]] = None, input_image_bytes: Optional[bytes] = None
 ) -> dict:
     """
     Wrapper for SketchGenerationService.run_sketch_generation().
