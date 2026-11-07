@@ -6,7 +6,7 @@ import json
 
 import typer
 
-from scenografia.agents.image_generation_agent import SketchGenerationService, TextGenerationService
+from scenografia.services import SketchGenerationService, TextGenerationService
 from scenografia.agents.style_compliance_agent import StyleComplianceAgent
 from scenografia.config import Config
 from scenografia.tools.output_manager import OutputManager
