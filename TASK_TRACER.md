@@ -8,16 +8,16 @@ Alla fine di ogni task viene eseguita la suite di test dedicata e globale, segui
 
 ## 📊 Riepilogo Avanzamento
 
-**Progresso Globale:** `24 / 24` step operativi completati (**100%**)
+**Progresso Globale:** `24 / 31` step operativi completati (**77%**)
 
 ```text
-[████████████████████] 100% (24/24 Task & Sotto-Task)
+[███████████████░░░░░] 77% (24/31 Task & Sotto-Task)
 ```
 
 - **Branch attivo**: `antigravity`
-- **Fasi totali**: 6 (Fasi 1-6 completate al 100%)
-- **Step operativi totali**: `24` (`24` completati, `0` rimanenti)
-- **Stato attuale**: 🎉 Completato con successo! Tutti i task sono stati implementati, verificati con 227 test passati e sincronizzati su `origin/antigravity`.
+- **Fasi totali**: 7 (Fasi 1-6 completate, Fase 7 pianificata)
+- **Step operativi totali**: `31` (`24` completati, `7` pianificati)
+- **Stato attuale**: 🚀 Fase 7: Transizione Nativa ad Antigravity & Hardening Risorse avviata.
 
 ---
 
@@ -50,6 +50,13 @@ Alla fine di ogni task viene eseguita la suite di test dedicata e globale, segui
 | **6. Hardening** | **Task 14** | Risoluzione al secondo e anti-collisione directory run (`list_recent_runs`) | Media | ✅ Completato | 223 passed (81% cov) | `067183d` | 2026-11-07 19:12 |
 | **6. Hardening** | **Task 15.1** | Mantenimento di Layer ed Export SVG nella Rigenerazione Web UI | Media | ✅ Completato | 224 passed (81% cov) | `30b5b98` | 2026-11-07 19:14 |
 | **6. Hardening** | **Task 15.2** | Comando CLI standalone `scenografia vectorize` | Media | ✅ Completato | 227 passed (81% cov) | `2d16095` | 2026-11-07 19:25 |
+| **7. Antigravity** | **Task 16** | Disaccoppiamento da OpenRouter e Antigravity come Provider Default | Media | ⏳ Pianificato | In attesa | — | — |
+| **7. Antigravity** | **Task 17.1** | Potenziamento di `AntigravityBridgeProvider` per Generazione Immagine Teatrale | Medio-Alta | ⏳ Pianificato | In attesa | — | — |
+| **7. Antigravity** | **Task 17.2** | Generazione Prompt Scenografico e Refining Nativo in `PromptEnhancerAgent` | Medio-Alta | ⏳ Pianificato | In attesa | — | — |
+| **7. Antigravity** | **Task 18.1** | Aggiornamento CLI (`scenografia models` e `generate`) ad Antigravity | Media | ⏳ Pianificato | In attesa | — | — |
+| **7. Antigravity** | **Task 18.2** | Aggiornamento Web UI (`web_app.py` e componenti) ad Antigravity senza chiavi esterne | Media | ⏳ Pianificato | In attesa | — | — |
+| **7. Antigravity** | **Task 19** | Prevenzione File Handle Leak su Windows (`Image.open`) e Ottimizzazione I/O Sketch | Media | ⏳ Pianificato | In attesa | — | — |
+| **7. Antigravity** | **Task 20** | Preservazione dei dettagli di errore API in `OpenRouterClient` (Fallback sicuro) | Bassa | ⏳ Pianificato | In attesa | — | — |
 
 ---
 
@@ -70,30 +77,41 @@ Alla fine di ogni task viene eseguita la suite di test dedicata e globale, segui
   - [x] **Sotto-Task 6.1**: Definizione dei Protocolli Provider (`src/scenografia/providers/`)
   - [x] **Sotto-Task 6.2**: Creazione dei Subagent e della Skill Nativa Antigravity
 
-### Fase 3: Architettura Modulare (Service Layer & Web UI Componentizzata)
-- [x] **Task 7**: Riorganizzazione Architetturale e Separazione del Service Layer
+### Fase 3: Architettura & Separazione delle Responsabilità
+- [x] **Task 7**: Disaccoppiamento CLI/Web e Creazione Service Layer
   - [x] **Sotto-Task 7.1**: Creazione del package `src/scenografia/services/` ed estrazione delle Pipeline
   - [x] **Sotto-Task 7.2**: Aggiornamento di CLI e Web UI al nuovo Service Layer
-- [x] **Task 8**: Modularizzazione della Web UI Streamlit e Galleria Storico
+- [x] **Task 8**: Modularizzazione dell'Interfaccia Web Streamlit
   - [x] **Sotto-Task 8.1**: Estrazione dei Componenti UI in `src/scenografia/web/`
   - [x] **Sotto-Task 8.2**: Implementazione della Galleria Storico (`history_gallery.py`)
 
-### Fase 4: Nuove Funzionalità Scenografiche
-- [x] **Task 9**: Vettorizzazione Effettiva (Export SVG Reale)
+### Fase 4: Nuove Funzionalità (Export SVG e Piani di Profondità)
+- [x] **Task 9**: Generazione e Vettorizzazione SVG Nativa
   - [x] **Sotto-Task 9.1**: Sviluppo del modulo `SvgVectorizer`
-  - [x] **Sotto-Task 9.2**: Integrazione dell'Export SVG in `OutputManager`, Service Layer, CLI e Web UI
-- [x] **Task 10**: Layering Teatrale (Separazione Piani di Profondità Scenica)
+  - [x] **Sotto-Task 9.2**: Integrazione dell'Export SVG in OutputManager, Service Layer, CLI e Web UI
+- [x] **Task 10**: Piani di Profondità Scenica (Background, Midground, Foreground)
   - [x] **Sotto-Task 10.1**: Estensione di `PromptEnhancerAgent` e `PromptTemplates` per i Piani di Profondità
   - [x] **Sotto-Task 10.2**: Integrazione del Selettore Piani di Profondità in Service Layer, CLI e Web UI
 
-### Fase 5: Qualità del Codice e CI/CD Automation
-- [x] **Task 11**: Pipeline CI/CD con GitHub Actions e Configurazione Linter / Type-Checking
+### Fase 5: CI/CD & Automazione della Qualità
+- [x] **Task 11**: Pipeline CI/CD con GitHub Actions e Configurazione Tooling Moderno
 
-### Fase 6: Rubber Duck Hardening & Perfezionamento
-- [x] **Task 12.1**: Correzione bug `export_svg` in `SketchGenerationService` + test end-to-end
-- [x] **Task 12.2**: Fail-Fast nei loop di generazione su errori irrecuperabili (401, 402, 403, 404)
+### Fase 6: Rubber Duck Hardening & Rifiniture
+- [x] **Task 12.1**: Risoluzione del NameError `export_svg` in `SketchGenerationService`
+- [x] **Task 12.2**: Fail-Fast nei loop di generazione su errori fatali (401, 402, 403, 404)
 - [x] **Task 13.1**: Correzione algoritmo K-Means color quantization in `SvgVectorizer`
-- [x] **Task 13.2**: Tagging semantico dei piani teatrali nel documento SVG (`<g id="...">`)
-- [x] **Task 14**: Risoluzione temporale al secondo e anti-collisione directory run
+- [x] **Task 13.2**: Tagging semantico dei piani teatrali nel documento SVG
+- [x] **Task 14**: Risoluzione al secondo e anti-collisione directory run
 - [x] **Task 15.1**: Mantenimento di Layer ed Export SVG nella Rigenerazione Web UI
 - [x] **Task 15.2**: Comando CLI standalone `scenografia vectorize`
+
+### Fase 7: Transizione Nativa ad Antigravity & Hardening Risorse
+- [ ] **Task 16**: Disaccoppiamento da OpenRouter e Antigravity come Provider Default
+- [ ] **Task 17**: Potenziamento di `AntigravityBridgeProvider` per Generazione Immagine e Testo
+  - [ ] **Sotto-Task 17.1**: Rendering di canvas scenografico e integrazione subagent con metadati completi
+  - [ ] **Sotto-Task 17.2**: Generazione Prompt Scenografico e Refining Nativo in `PromptEnhancerAgent`
+- [ ] **Task 18**: Aggiornamento CLI e Web UI per Antigravity Nativo
+  - [ ] **Sotto-Task 18.1**: Aggiornamento CLI (`scenografia models` e `generate`) ad Antigravity
+  - [ ] **Sotto-Task 18.2**: Aggiornamento Web UI (`web_app.py` e componenti) ad Antigravity senza chiavi esterne
+- [ ] **Task 19**: Prevenzione File Handle Leak su Windows (`Image.open`) e Ottimizzazione I/O Sketch
+- [ ] **Task 20**: Preservazione dei dettagli di errore API in `OpenRouterClient` (Fallback sicuro)
