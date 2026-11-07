@@ -52,3 +52,14 @@ def test_provider_factory_selection():
 
     ag_text = get_text_provider("antigravity")
     assert isinstance(ag_text, AntigravityBridgeProvider)
+
+def test_provider_factory_defaults_to_antigravity():
+    """Verify factory returns AntigravityBridgeProvider by default with no env override."""
+    import os
+    orig = os.environ.pop("SCENOGRAFIA_PROVIDER", None)
+    try:
+        assert isinstance(get_image_provider(), AntigravityBridgeProvider)
+        assert isinstance(get_text_provider(), AntigravityBridgeProvider)
+    finally:
+        if orig:
+            os.environ["SCENOGRAFIA_PROVIDER"] = orig

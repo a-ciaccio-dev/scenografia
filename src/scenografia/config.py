@@ -28,8 +28,11 @@ def load_environment() -> None:
 class Config:
     """Application configuration."""
     
-    # OpenRouter image generation API configuration
-    OPENROUTER_API_KEY: str
+    # Active Provider (default: antigravity native)
+    SCENOGRAFIA_PROVIDER: str = "antigravity"
+
+    # OpenRouter image generation API configuration (optional if using antigravity)
+    OPENROUTER_API_KEY: Optional[str] = None
     OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1"
     OPENROUTER_TIMEOUT: float = 60.0
     
@@ -51,11 +54,14 @@ class Config:
         """Initialize configuration from environment."""
         load_environment()
         
-        # Required: API key
+        # Provider selection: antigravity (default) or openrouter
+        cls.SCENOGRAFIA_PROVIDER = os.getenv("SCENOGRAFIA_PROVIDER", "antigravity").lower()
+
+        # OpenRouter API key (only required when explicitly configured for openrouter)
         api_key = os.getenv("OPENROUTER_API_KEY")
-        if not api_key:
+        if cls.SCENOGRAFIA_PROVIDER == "openrouter" and not api_key:
             raise ValueError(
-                "OPENROUTER_API_KEY is required. Please set it in .env or environment."
+                "OPENROUTER_API_KEY is required when SCENOGRAFIA_PROVIDER='openrouter'. Please set it in .env or environment."
             )
         cls.OPENROUTER_API_KEY = api_key
         
@@ -143,13 +149,22 @@ class Config:
         if configured:
             return configured
         
-        # Fallback defaults - OpenRouter image-capable models
-        fallbacks = {
-            GenerationMode.DRAFT: "google/gemini-2.5-flash-image",
-            GenerationMode.STANDARD: "google/gemini-2.5-flash-image",
-            GenerationMode.PRODUCTION: "google/gemini-2.5-flash-image",
-            GenerationMode.VECTOR_READY: "google/gemini-2.5-flash-image",
-        }
+        # Fallback defaults based on active provider
+        provider = getattr(cls, "SCENOGRAFIA_PROVIDER", "antigravity").lower()
+        if provider in ("antigravity", "bridge", "local"):
+            fallbacks = {
+                GenerationMode.DRAFT: "antigravity/gemini-2.5-flash-image",
+                GenerationMode.STANDARD: "antigravity/gemini-2.5-flash-image",
+                GenerationMode.PRODUCTION: "antigravity/gemini-2.5-pro-image",
+                GenerationMode.VECTOR_READY: "antigravity/gemini-2.5-pro-image",
+            }
+        else:
+            fallbacks = {
+                GenerationMode.DRAFT: "google/gemini-2.5-flash-image",
+                GenerationMode.STANDARD: "google/gemini-2.5-flash-image",
+                GenerationMode.PRODUCTION: "google/gemini-2.5-flash-image",
+                GenerationMode.VECTOR_READY: "google/gemini-2.5-flash-image",
+            }
         return fallbacks.get(mode, fallbacks[GenerationMode.STANDARD])
 
     @classmethod
@@ -177,8 +192,10 @@ class Config:
         Returns:
             True if valid, raises exception otherwise
         """
-        if not hasattr(cls, "OPENROUTER_API_KEY") or not cls.OPENROUTER_API_KEY:
-            raise ValueError("OPENROUTER_API_KEY not set")
+        provider = getattr(cls, "SCENOGRAFIA_PROVIDER", "antigravity").lower()
+        if provider == "openrouter":
+            if not getattr(cls, "OPENROUTER_API_KEY", None):
+                raise ValueError("OPENROUTER_API_KEY not set")
         
         # Ensure output directory exists
         Path(cls.APP_OUTPUT_DIR).mkdir(parents=True, exist_ok=True)

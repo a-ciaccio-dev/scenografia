@@ -14,12 +14,12 @@ def get_image_provider(provider_type: Optional[str] = None) -> BaseImageProvider
     Get an image provider instance.
     
     Args:
-        provider_type: 'openrouter' or 'antigravity' (defaults to SCENOGRAFIA_PROVIDER env or 'openrouter')
+        provider_type: 'antigravity' or 'openrouter' (defaults to SCENOGRAFIA_PROVIDER env or 'antigravity')
     """
-    selected = (provider_type or os.getenv("SCENOGRAFIA_PROVIDER", "openrouter")).lower()
-    if selected in ("antigravity", "bridge", "local"):
-        return AntigravityBridgeProvider()
-    return OpenRouterProvider()
+    selected = (provider_type or os.getenv("SCENOGRAFIA_PROVIDER", "antigravity")).lower()
+    if selected == "openrouter":
+        return OpenRouterProvider()
+    return AntigravityBridgeProvider()
 
 
 def get_text_provider(provider_type: Optional[str] = None) -> BaseTextProvider:
@@ -27,9 +27,9 @@ def get_text_provider(provider_type: Optional[str] = None) -> BaseTextProvider:
     Get a text provider instance.
     
     Args:
-        provider_type: 'openrouter' or 'antigravity' (defaults to SCENOGRAFIA_PROVIDER env or 'openrouter')
+        provider_type: 'antigravity' or 'openrouter' (defaults to SCENOGRAFIA_PROVIDER env or 'antigravity')
     """
-    selected = (provider_type or os.getenv("SCENOGRAFIA_PROVIDER", "openrouter")).lower()
-    if selected in ("antigravity", "bridge", "local"):
-        return AntigravityBridgeProvider()
-    return OpenRouterProvider()
+    selected = (provider_type or os.getenv("SCENOGRAFIA_PROVIDER", "antigravity")).lower()
+    if selected == "openrouter":
+        return OpenRouterProvider()
+    return AntigravityBridgeProvider()

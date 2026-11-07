@@ -10,23 +10,39 @@ import os
 class TestConfigInitialization:
     """Test configuration initialization."""
     
-    def test_config_requires_api_key(self):
-        """API key should be required."""
-        # Save original
+    def test_config_antigravity_default_requires_no_key(self):
+        """Under Antigravity default provider, API key is optional."""
         original_key = os.getenv("OPENROUTER_API_KEY")
+        original_provider = os.getenv("SCENOGRAFIA_PROVIDER")
         try:
-            # Clear the key
             if "OPENROUTER_API_KEY" in os.environ:
                 del os.environ["OPENROUTER_API_KEY"]
-            
-            # Should raise ValueError
-            with pytest.raises(ValueError, match="OPENROUTER_API_KEY"):
-                Config.OPENROUTER_API_KEY = None
-                Config.validate()
+            Config.SCENOGRAFIA_PROVIDER = "antigravity"
+            Config.OPENROUTER_API_KEY = None
+            assert Config.validate() is True
         finally:
-            # Restore
             if original_key:
                 os.environ["OPENROUTER_API_KEY"] = original_key
+            if original_provider:
+                os.environ["SCENOGRAFIA_PROVIDER"] = original_provider
+
+    def test_config_requires_api_key_when_openrouter(self):
+        """API key should be required only when SCENOGRAFIA_PROVIDER is openrouter."""
+        original_key = os.getenv("OPENROUTER_API_KEY")
+        original_provider = os.getenv("SCENOGRAFIA_PROVIDER")
+        try:
+            if "OPENROUTER_API_KEY" in os.environ:
+                del os.environ["OPENROUTER_API_KEY"]
+            Config.SCENOGRAFIA_PROVIDER = "openrouter"
+            Config.OPENROUTER_API_KEY = None
+            with pytest.raises(ValueError, match="OPENROUTER_API_KEY"):
+                Config.validate()
+        finally:
+            if original_key:
+                os.environ["OPENROUTER_API_KEY"] = original_key
+            if original_provider:
+                os.environ["SCENOGRAFIA_PROVIDER"] = original_provider
+            Config.SCENOGRAFIA_PROVIDER = "antigravity"
     
     def test_config_default_values(self):
         """Test default configuration values."""
