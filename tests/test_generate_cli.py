@@ -90,3 +90,29 @@ def test_generate_text_allows_model_override(monkeypatch):
     assert result.exit_code == 0
     assert service.calls[0]["model"] == "custom/model"
     assert service.calls[0]["orientation"] == Orientation.PORTRAIT
+
+def test_generate_text_antigravity_native_end_to_end(tmp_path, monkeypatch):
+    """Verify CLI generate command executes natively end-to-end with Antigravity provider."""
+    import os
+    from scenografia.config import Config
+    
+    monkeypatch.setattr(Config, "APP_OUTPUT_DIR", str(tmp_path))
+    monkeypatch.setattr(Config, "SCENOGRAFIA_PROVIDER", "antigravity")
+    
+    result = runner.invoke(
+        app,
+        [
+            "generate",
+            "--prompt",
+            "Atrio di un palazzo veneziano",
+            "--mode",
+            "standard",
+            "--orientation",
+            "landscape",
+            "--export-svg",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert "Generated scenic design in" in result.stdout
+    assert "Vector SVG saved to" in result.stdout

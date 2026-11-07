@@ -161,10 +161,15 @@ def validate(
 @app.command()
 def models() -> None:
     """List available models for each generation mode."""
-    lines = ["Configured generation models:"]
+    provider = getattr(Config, "SCENOGRAFIA_PROVIDER", "antigravity")
+    lines = [
+        f"Active Provider: {provider.upper()}",
+        "Configured generation models:"
+    ]
     for mode in GenerationMode:
         configured_model = Config.get_model_for_mode(mode)
-        model_display = configured_model if configured_model else "not configured (set in .env)"
+        default_model = Config.get_model_id(mode)
+        model_display = configured_model if configured_model else f"not configured (default: {default_model}) (set in .env)"
         lines.append(f"- {mode.value}: {model_display}")
     typer.echo("\n".join(lines))
 

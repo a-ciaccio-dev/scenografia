@@ -111,7 +111,7 @@ class TextGenerationService:
             orientation=orientation,
             generation_mode=normalized_mode,
             model_id=response.model_used,
-            brief=brief,
+            brief=brief.model_dump() if hasattr(brief, "model_dump") else brief,
             final_prompt=prompt_package["final_prompt"],
             negative_prompt=prompt_package["negative_prompt"],
             image_url=response.image_url,
