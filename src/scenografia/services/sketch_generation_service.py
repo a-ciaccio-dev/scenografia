@@ -82,14 +82,22 @@ class SketchGenerationService:
         if progress_callback:
             progress_callback("prompt")
         prompt_package = self.prompt_engineer.build_prompt_package(brief)
+        import inspect
+        comp_sig = inspect.signature(self._complete_generation)
+        complete_kwargs = {
+            "output_dir": output_dir,
+            "progress_callback": progress_callback,
+            "input_image_bytes": input_image_bytes,
+        }
+        if "export_svg" in comp_sig.parameters or any(p.kind == inspect.Parameter.VAR_KEYWORD for p in comp_sig.parameters.values()):
+            complete_kwargs["export_svg"] = export_svg
+
         return self._complete_generation(
             request,
             brief,
             prompt_package,
             interpretation,
-            output_dir=output_dir,
-            progress_callback=progress_callback,
-            input_image_bytes=input_image_bytes
+            **complete_kwargs,
         )
 
     def _complete_generation(
@@ -100,7 +108,8 @@ class SketchGenerationService:
         interpretation,
         output_dir=None,
         progress_callback=None,
-        input_image_bytes=None
+        input_image_bytes=None,
+        export_svg: bool = False,
     ) -> Dict[str, Any]:
         """Finish provider generation and artifact persistence for sketch mode."""
         max_attempts = 3
@@ -131,6 +140,7 @@ class SketchGenerationService:
         if progress_callback:
             progress_callback("validate")
         validation_report = self.style_validator.validate_text_run(brief, prompt_package, response)
+        brief_dict = brief.model_dump() if hasattr(brief, "model_dump") else brief
         metadata = GenerationMetadata(
             run_id=response.request_id,
             input_type="sketch",
@@ -138,7 +148,7 @@ class SketchGenerationService:
             orientation=request.orientation,
             generation_mode=request.mode,
             model_id=response.model_used,
-            brief=brief,
+            brief=brief_dict,
             final_prompt=prompt_package["final_prompt"],
             negative_prompt=prompt_package["negative_prompt"],
             image_url=response.image_url,
