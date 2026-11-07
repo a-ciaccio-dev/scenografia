@@ -7,16 +7,16 @@ Le attività sono ordinate secondo una sequenza **Bottom-Up sinergica** (5 Fasi)
 
 ## 📊 Riepilogo Avanzamento
 
-**Progresso Globale:** `8 / 17` step operativi completati (**47%**)
+**Progresso Globale:** `9 / 17` step operativi completati (**53%**)
 
 ```text
-[████████░░░░░░░░░] 47% (8/17 Task & Sotto-Task)
+[█████████░░░░░░░░] 53% (9/17 Task & Sotto-Task)
 ```
 
 - **Branch attivo**: `antigravity`
 - **Task principali**: `6 / 11`
-- **Step operativi**: `8 / 17`
-- **Stato attuale**: 🚀 In corso — Fase 3 (Sotto-Task 7.1 in avvio)
+- **Step operativi**: `9 / 17`
+- **Stato attuale**: 🚀 In corso — Fase 3 (Sotto-Task 7.2 in avvio)
 
 ---
 
@@ -33,7 +33,7 @@ Le attività sono ordinate secondo una sequenza **Bottom-Up sinergica** (5 Fasi)
 | **2. Rete & AI** | **Task 5** | Resilienza di Rete, Retry con Backoff (`tenacity`) e Timeout Configurabile | Media | ✅ Completato | 186 passed (0 warnings) | `43393a2` | 2026-11-07 17:58 |
 | **2. Rete & AI** | **Task 6.1** | Definizione dei Protocolli Provider (`src/scenografia/providers/`) | Alta | ✅ Completato | 191 passed (0 warnings) | `d0bdca9` | 2026-11-07 18:02 |
 | **2. Rete & AI** | **Task 6.2** | Creazione dei Subagent e della Skill Nativa Antigravity | Alta | ✅ Completato | 193 passed (0 warnings) | `3c17cd5` | 2026-11-07 18:03 |
-| **3. Architettura** | **Task 7.1** | Creazione del package `src/scenografia/services/` ed estrazione delle Pipeline | Alta | ⏳ Da fare | — | — | — |
+| **3. Architettura** | **Task 7.1** | Creazione del package `src/scenografia/services/` ed estrazione delle Pipeline | Alta | ✅ Completato | 193 passed (0 warnings) | `5915c64` | 2026-11-07 18:06 |
 | **3. Architettura** | **Task 7.2** | Aggiornamento di CLI e Web UI al nuovo Service Layer | Alta | ⏳ Da fare | — | — | — |
 | **3. Architettura** | **Task 8.1** | Estrazione dei Componenti UI in `src/scenografia/web/` | Alta | ⏳ Da fare | — | — | — |
 | **3. Architettura** | **Task 8.2** | Implementazione della Galleria Storico (`history_gallery.py`) | Alta | ⏳ Da fare | — | — | — |
@@ -64,7 +64,7 @@ Le attività sono ordinate secondo una sequenza **Bottom-Up sinergica** (5 Fasi)
 
 ### Fase 3: Architettura Modulare (Service Layer & Web UI Componentizzata)
 - [ ] **Task 7**: Riorganizzazione Architetturale e Separazione del Service Layer
-  - [ ] **Sotto-Task 7.1**: Creazione del package `src/scenografia/services/` ed estrazione delle Pipeline
+  - [x] **Sotto-Task 7.1**: Creazione del package `src/scenografia/services/` ed estrazione delle Pipeline
   - [ ] **Sotto-Task 7.2**: Aggiornamento di CLI e Web UI al nuovo Service Layer
 - [ ] **Task 8**: Modularizzazione della Web UI Streamlit e Galleria Storico
   - [ ] **Sotto-Task 8.1**: Estrazione dei Componenti UI in `src/scenografia/web/`
