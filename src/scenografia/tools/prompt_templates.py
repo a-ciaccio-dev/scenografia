@@ -56,6 +56,28 @@ BASE_PROMPT = """Create a theatrical scenic design sketch with these characteris
 BASE_NEGATIVE = """Avoid: photorealism, photographic rendering, gradients, complex textures, text, watermark, logos, captions, 3D-render aesthetics, blurry edges, excessive micro-details, airbrush, digital glow, unreadable shape noise."""
 
 
+# Theatrical depth layer definitions
+DEPTH_LAYERS = {
+    "all": "Full scenic composition with unified foreground, midground, and background.",
+    "background": "Theatrical backdrop (fondale scenico) depicting the deepest visual plane: distant horizons, skies, landscape, or back walls, clear of foreground obstructions.",
+    "midground": "Intermediate scenic plane (piano medio / praticabili): architectural platforms, structures, arches, and set pieces located between the backdrop and proscenium.",
+    "foreground": "Proscenium frame and lateral wings (quinte e cieli di proscenio): flanking columns, framing arches, foliage wings, or portal elements framing the stage with an open center.",
+}
+
+DEPTH_LAYER_INSTRUCTIONS = {
+    "all": "",
+    "background": "Theatrical Scenic Layer: BACKDROP (Fondale). Focus exclusively on the distant scenic backdrop plane. Keep the central floor and proscenium area clear and open. Depict distant architectural facades, horizon, sky, or atmospheric back wall without foreground cutouts.",
+    "midground": "Theatrical Scenic Layer: MIDGROUND (Praticabili e Piani Intermedi). Focus on free-standing architectural set pieces, stairs, platforms, bridges, or central physical elements placed on the stage floor, designed to sit in front of the backdrop.",
+    "foreground": "Theatrical Scenic Layer: FOREGROUND / PROSCENIUM WINGS (Quinte e Cieli). Focus on the lateral stage framing, side wings (quinte laterali), borders (cieli teatrali), and proscenium portals. The center must remain open to allow visibility of the inner stage.",
+}
+
+
+def get_depth_layer_instruction(layer: str) -> str:
+    """Return specific theatrical scenic layer instruction."""
+    norm = layer.lower().strip() if layer else "all"
+    return DEPTH_LAYER_INSTRUCTIONS.get(norm, "")
+
+
 # Orientation descriptions
 ORIENTATION_DESCRIPTIONS = {
     Orientation.PORTRAIT: "portrait orientation (taller than wide)",

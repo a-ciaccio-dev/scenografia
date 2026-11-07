@@ -21,7 +21,8 @@ class PromptEnhancerAgent:
         raw_prompt: str,
         model_id: Optional[str] = None,
         image_bytes: Optional[bytes] = None,
-        division: Optional[str] = "Nessuna"
+        division: Optional[str] = "Nessuna",
+        layer: Optional[str] = "all",
     ) -> str:
         """
         Rewrite raw prompt into a rich, detailed theatrical scene description.
@@ -74,6 +75,11 @@ class PromptEnhancerAgent:
             "7. Output ONLY the markdown formatted specification. Do not include any introductory remarks, explanations, conversational filler, or surrounding quotes."
             + division_rule
         )
+
+        from scenografia.tools.prompt_templates import get_depth_layer_instruction
+        layer_instruction = get_depth_layer_instruction(layer or "all")
+        if layer_instruction:
+            system_instruction += f"\nADDITIONAL THEATRICAL DEPTH LAYER CONSTRAINT:\n{layer_instruction}\n"
 
         user_prompt = raw_prompt.strip()
         if image_bytes:
