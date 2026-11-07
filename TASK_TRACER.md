@@ -7,16 +7,16 @@ Le attività sono ordinate secondo una sequenza **Bottom-Up sinergica** (5 Fasi)
 
 ## 📊 Riepilogo Avanzamento
 
-**Progresso Globale:** `11 / 17` step operativi completati (**65%**)
+**Progresso Globale:** `12 / 17` step operativi completati (**71%**)
 
 ```text
-[███████████░░░░░░] 65% (11/17 Task & Sotto-Task)
+[████████████░░░░░] 71% (12/17 Task & Sotto-Task)
 ```
 
 - **Branch attivo**: `antigravity`
-- **Task principali**: `7 / 11`
-- **Step operativi**: `11 / 17`
-- **Stato attuale**: 🚀 In corso — Fase 3 (Sotto-Task 8.2 in avvio)
+- **Task principali**: `8 / 11`
+- **Step operativi**: `12 / 17`
+- **Stato attuale**: 🚀 In corso — Fase 4 (Sotto-Task 9.1 in avvio)
 
 ---
 
@@ -36,7 +36,7 @@ Le attività sono ordinate secondo una sequenza **Bottom-Up sinergica** (5 Fasi)
 | **3. Architettura** | **Task 7.1** | Creazione del package `src/scenografia/services/` ed estrazione delle Pipeline | Alta | ✅ Completato | 193 passed (0 warnings) | `5915c64` | 2026-11-07 18:06 |
 | **3. Architettura** | **Task 7.2** | Aggiornamento di CLI e Web UI al nuovo Service Layer | Alta | ✅ Completato | 195 passed (0 warnings) | `52f7887` | 2026-11-07 18:09 |
 | **3. Architettura** | **Task 8.1** | Estrazione dei Componenti UI in `src/scenografia/web/` | Alta | ✅ Completato | 199 passed (0 warnings) | `8410b9a` | 2026-11-07 18:14 |
-| **3. Architettura** | **Task 8.2** | Implementazione della Galleria Storico (`history_gallery.py`) | Alta | ⏳ Da fare | — | — | — |
+| **3. Architettura** | **Task 8.2** | Implementazione della Galleria Storico (`history_gallery.py`) | Alta | ✅ Completato | 201 passed (0 warnings) | `04de19c` | 2026-11-07 18:17 |
 | **4. Feature** | **Task 9.1** | Sviluppo del modulo `SvgVectorizer` (`src/scenografia/tools/svg_vectorizer.py`) | Alta | ⏳ Da fare | — | — | — |
 | **4. Feature** | **Task 9.2** | Integrazione dell'Export SVG in `OutputManager`, Service Layer, CLI e Web UI | Alta | ⏳ Da fare | — | — | — |
 | **4. Feature** | **Task 10.1** | Estensione di `PromptEnhancerAgent` e `PromptTemplates` per i Piani di Profondità | Alta | ⏳ Da fare | — | — | — |
@@ -66,9 +66,9 @@ Le attività sono ordinate secondo una sequenza **Bottom-Up sinergica** (5 Fasi)
 - [x] **Task 7**: Riorganizzazione Architetturale e Separazione del Service Layer
   - [x] **Sotto-Task 7.1**: Creazione del package `src/scenografia/services/` ed estrazione delle Pipeline
   - [x] **Sotto-Task 7.2**: Aggiornamento di CLI e Web UI al nuovo Service Layer
-- [ ] **Task 8**: Modularizzazione della Web UI Streamlit e Galleria Storico
+- [x] **Task 8**: Modularizzazione della Web UI Streamlit e Galleria Storico
   - [x] **Sotto-Task 8.1**: Estrazione dei Componenti UI in `src/scenografia/web/`
-  - [ ] **Sotto-Task 8.2**: Implementazione della Galleria Storico (`history_gallery.py`)
+  - [x] **Sotto-Task 8.2**: Implementazione della Galleria Storico (`history_gallery.py`)
 
 ### Fase 4: Nuove Funzionalità Scenografiche (Innestate sull'Architettura Pulita)
 - [ ] **Task 9**: Vettorizzazione Effettiva (Export SVG Reale)
