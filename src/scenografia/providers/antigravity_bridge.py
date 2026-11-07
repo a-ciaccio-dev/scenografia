@@ -165,20 +165,20 @@ class AntigravityBridgeProvider(BaseImageProvider, BaseTextProvider):
         """Generate structured theatrical prompt specification natively."""
         scene_name = prompt.strip().upper()[:30]
         layer_note = ""
-        prompt_lower = prompt.lower()
-        if "foreground" in prompt_lower:
+        combined_text = f"{prompt} {system_instruction or ''}".lower()
+        if "foreground" in combined_text or "primo piano" in combined_text:
             layer_note = "\n- Isolamento piano di profondità: PRIMO PIANO (Quinte, cieli e proscenio)."
-        elif "midground" in prompt_lower:
+        elif "midground" in combined_text or "mezzo piano" in combined_text:
             layer_note = "\n- Isolamento piano di profondità: MEZZO PIANO (Praticabili, architetture e strutture mediane)."
-        elif "background" in prompt_lower:
+        elif "background" in combined_text or "fondale" in combined_text:
             layer_note = "\n- Isolamento piano di profondità: FONDALE (Backdrop, orizzonte e cielo)."
 
         division_note = ""
-        if "2 parti" in prompt_lower or "divided into 2" in prompt_lower:
+        if "2 parti" in combined_text or "divided into 2" in combined_text:
             division_note = "\n- Suddivisione scenica: 2 sezioni simmetriche separate da elemento verticale centrale."
-        elif "3 parti" in prompt_lower or "divided into 3" in prompt_lower:
+        elif "3 parti" in combined_text or "divided into 3" in combined_text:
             division_note = "\n- Suddivisione scenica: 3 pannelli verticali uguali separati da colonne o quinte."
-        elif "4 parti" in prompt_lower or "divided into 4" in prompt_lower:
+        elif "4 parti" in combined_text or "divided into 4" in combined_text:
             division_note = "\n- Suddivisione scenica: 4 pannelli verticali con ritmo modulare."
 
         return (

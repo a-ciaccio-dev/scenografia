@@ -34,16 +34,16 @@ class TestPromptEnhancerAgent:
         assert "theatrical" in kwargs["system_instruction"].lower()
 
     def test_enhance_prompt_uses_config_model_by_default(self):
-        """Enhancing a prompt should default to Config.OPENROUTER_ENHANCER_MODEL or fallback."""
+        """Enhancing a prompt should default to configured enhancer model based on active provider."""
         mock_client = Mock()
         mock_client.generate_text.return_value = "Enhanced"
         agent = PromptEnhancerAgent(client=mock_client)
 
-        with patch.object(Config, "OPENROUTER_ENHANCER_MODEL", "configured-model"):
+        with patch.object(Config, "ANTIGRAVITY_ENHANCER_MODEL", "ag-configured-model"):
             agent.enhance_prompt("concept")
             mock_client.generate_text.assert_called_once()
             _, kwargs = mock_client.generate_text.call_args
-            assert kwargs["model_id"] == "configured-model"
+            assert kwargs["model_id"] == "ag-configured-model"
 
     def test_enhance_prompt_fallback_on_error(self):
         """If client.generate_text raises an exception, the agent should return the raw prompt."""
@@ -119,3 +119,12 @@ class TestPromptEnhancerAgent:
         _, kwargs = mock_client.generate_text.call_args
         assert "divided into 4 panels" in kwargs["system_instruction"]
 
+
+    def test_enhance_prompt_antigravity_native_integration(self):
+        """Verify PromptEnhancerAgent integrates natively with default Antigravity text provider."""
+        agent = PromptEnhancerAgent()
+        result = agent.enhance_prompt("Castello nella tempesta", division="2 parti", layer="foreground")
+        assert "🎨 DATI TECNICI" in result
+        assert "CASTELLO NELLA TEMPESTA" in result
+        assert "PRIMO PIANO" in result
+        assert "2 sezioni simmetriche" in result

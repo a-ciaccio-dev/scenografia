@@ -39,7 +39,12 @@ class PromptEnhancerAgent:
         if not raw_prompt or not raw_prompt.strip():
             return ""
 
-        model = model_id or Config.OPENROUTER_ENHANCER_MODEL or "google/gemini-2.5-flash"
+        provider = getattr(Config, "SCENOGRAFIA_PROVIDER", "antigravity").lower()
+        if provider in ("antigravity", "bridge", "local"):
+            default_model = getattr(Config, "ANTIGRAVITY_ENHANCER_MODEL", "gemini-2.5-flash")
+        else:
+            default_model = getattr(Config, "OPENROUTER_ENHANCER_MODEL", "google/gemini-2.5-flash")
+        model = model_id or default_model
         
         division_rule = ""
         if division == "2 parti":

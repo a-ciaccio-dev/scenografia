@@ -37,6 +37,7 @@ class Config:
     OPENROUTER_TIMEOUT: float = 60.0
     
     # Optional enhancer model
+    ANTIGRAVITY_ENHANCER_MODEL: str = "gemini-2.5-flash"
     OPENROUTER_ENHANCER_MODEL: str = "google/gemini-2.5-flash"
     
     # Application directories
