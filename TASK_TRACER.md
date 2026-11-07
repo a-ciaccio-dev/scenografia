@@ -7,16 +7,16 @@ Le attività sono ordinate secondo una sequenza **Bottom-Up sinergica** (5 Fasi)
 
 ## 📊 Riepilogo Avanzamento
 
-**Progresso Globale:** `13 / 17` step operativi completati (**76%**)
+**Progresso Globale:** `14 / 17` step operativi completati (**82%**)
 
 ```text
-[█████████████░░░░] 76% (13/17 Task & Sotto-Task)
+[██████████████░░░] 82% (14/17 Task & Sotto-Task)
 ```
 
 - **Branch attivo**: `antigravity`
-- **Task principali**: `8 / 11`
-- **Step operativi**: `13 / 17`
-- **Stato attuale**: 🚀 In corso — Fase 4 (Sotto-Task 9.2 in avvio)
+- **Task principali**: `9 / 11`
+- **Step operativi**: `14 / 17`
+- **Stato attuale**: 🚀 In corso — Fase 4 (Sotto-Task 10.1 in avvio)
 
 ---
 
@@ -38,7 +38,7 @@ Le attività sono ordinate secondo una sequenza **Bottom-Up sinergica** (5 Fasi)
 | **3. Architettura** | **Task 8.1** | Estrazione dei Componenti UI in `src/scenografia/web/` | Alta | ✅ Completato | 199 passed (0 warnings) | `8410b9a` | 2026-11-07 18:14 |
 | **3. Architettura** | **Task 8.2** | Implementazione della Galleria Storico (`history_gallery.py`) | Alta | ✅ Completato | 201 passed (0 warnings) | `04de19c` | 2026-11-07 18:17 |
 | **4. Feature** | **Task 9.1** | Sviluppo del modulo `SvgVectorizer` (`src/scenografia/tools/svg_vectorizer.py`) | Alta | ✅ Completato | 205 passed (0 warnings) | `26f6659` | 2026-11-07 18:19 |
-| **4. Feature** | **Task 9.2** | Integrazione dell'Export SVG in `OutputManager`, Service Layer, CLI e Web UI | Alta | ⏳ Da fare | — | — | — |
+| **4. Feature** | **Task 9.2** | Integrazione dell'Export SVG in `OutputManager`, Service Layer, CLI e Web UI | Alta | ✅ Completato | 208 passed (0 warnings) | `24f5630` | 2026-11-07 18:34 |
 | **4. Feature** | **Task 10.1** | Estensione di `PromptEnhancerAgent` e `PromptTemplates` per i Piani di Profondità | Alta | ⏳ Da fare | — | — | — |
 | **4. Feature** | **Task 10.2** | Integrazione del Selettore Piani di Profondità in Service Layer, CLI e Web UI | Alta | ⏳ Da fare | — | — | — |
 | **5. CI/CD** | **Task 11** | Pipeline CI/CD (GitHub Actions) e Configurazione Linter/Type-Checker | Media | ⏳ Da fare | — | — | — |
@@ -71,9 +71,9 @@ Le attività sono ordinate secondo una sequenza **Bottom-Up sinergica** (5 Fasi)
   - [x] **Sotto-Task 8.2**: Implementazione della Galleria Storico (`history_gallery.py`)
 
 ### Fase 4: Nuove Funzionalità Scenografiche (Innestate sull'Architettura Pulita)
-- [ ] **Task 9**: Vettorizzazione Effettiva (Export SVG Reale)
+- [x] **Task 9**: Vettorizzazione Effettiva (Export SVG Reale)
   - [x] **Sotto-Task 9.1**: Sviluppo del modulo `SvgVectorizer`
-  - [ ] **Sotto-Task 9.2**: Integrazione dell'Export SVG in `OutputManager`, Service Layer, CLI e Web UI
+  - [x] **Sotto-Task 9.2**: Integrazione dell'Export SVG in `OutputManager`, Service Layer, CLI e Web UI
 - [ ] **Task 10**: Layering Teatrale (Separazione Piani di Profondità Scenica)
   - [ ] **Sotto-Task 10.1**: Estensione di `PromptEnhancerAgent` e `PromptTemplates` per i Piani di Profondità
   - [ ] **Sotto-Task 10.2**: Integrazione del Selettore Piani di Profondità in Service Layer, CLI e Web UI
