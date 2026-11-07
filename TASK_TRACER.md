@@ -7,16 +7,16 @@ Le attività sono ordinate secondo una sequenza **Bottom-Up sinergica** (5 Fasi)
 
 ## 📊 Riepilogo Avanzamento
 
-**Progresso Globale:** `3 / 17` step operativi completati (**18%**)
+**Progresso Globale:** `4 / 17` step operativi completati (**24%**)
 
 ```text
-[███░░░░░░░░░░░░░] 18% (3/17 Task & Sotto-Task)
+[████░░░░░░░░░░░░] 24% (4/17 Task & Sotto-Task)
 ```
 
 - **Branch attivo**: `antigravity`
-- **Task principali**: `2 / 11`
-- **Step operativi**: `3 / 17`
-- **Stato attuale**: 🚀 In corso — Fase 1 (Sotto-Task 3.2 in avvio)
+- **Task principali**: `3 / 11`
+- **Step operativi**: `4 / 17`
+- **Stato attuale**: 🚀 In corso — Fase 2 (Task 4 in avvio)
 
 ---
 
@@ -28,7 +28,7 @@ Le attività sono ordinate secondo una sequenza **Bottom-Up sinergica** (5 Fasi)
 | **1. Fondamenta** | **Task 1** | Aggiornamento Schemi a Pydantic V2 e Standard Python 3.12+ | Bassa | ✅ Completato | 183 passed (0 warnings) | `e7e0c76` | 2026-11-07 17:35 |
 | **1. Fondamenta** | **Task 2** | Correzioni di Stile PEP 8 e Annotazioni di Tipo (`Callable`, import) | Bassa | ✅ Completato | 183 passed (0 warnings) | `6f8524a` | 2026-11-07 17:39 |
 | **1. Fondamenta** | **Task 3.1** | Evoluzione di `StructuredBrief` e introduzione del modello `PromptPackage` | Medio-Alta | ✅ Completato | 183 passed (0 warnings) | `4a45edf` | 2026-11-07 17:42 |
-| **1. Fondamenta** | **Task 3.2** | Adeguamento Agenti, `StyleComplianceAgent` e `OutputManager` ai Modelli Tipizzati | Medio-Alta | ⏳ Da fare | — | — | — |
+| **1. Fondamenta** | **Task 3.2** | Adeguamento Agenti, `StyleComplianceAgent` e `OutputManager` ai Modelli Tipizzati | Medio-Alta | ✅ Completato | 183 passed (0 warnings) | `5f42c40` | 2026-11-07 17:47 |
 | **2. Rete & AI** | **Task 4** | Rotazione dei Log (`RotatingFileHandler`) e Gestione Cartella `logs/` | Bassa | ⏳ Da fare | — | — | — |
 | **2. Rete & AI** | **Task 5** | Resilienza di Rete, Retry con Backoff (`tenacity`) e Timeout Configurabile | Media | ⏳ Da fare | — | — | — |
 | **2. Rete & AI** | **Task 6.1** | Definizione dei Protocolli Provider (`src/scenografia/providers/`) | Alta | ⏳ Da fare | — | — | — |
@@ -51,9 +51,9 @@ Le attività sono ordinate secondo una sequenza **Bottom-Up sinergica** (5 Fasi)
 - [x] **Init**: Creazione e configurazione branch `antigravity`
 - [x] **Task 1**: Aggiornamento Schemi a Pydantic V2 e Standard Python 3.12+
 - [x] **Task 2**: Correzioni di Stile PEP 8 e Annotazioni di Tipo
-- [ ] **Task 3**: Tipizzazione Rigida dei Contratti Dati tra Agenti
+- [x] **Task 3**: Tipizzazione Rigida dei Contratti Dati tra Agenti
   - [x] **Sotto-Task 3.1**: Evoluzione di `StructuredBrief` e introduzione del modello `PromptPackage`
-  - [ ] **Sotto-Task 3.2**: Adeguamento Agenti, `StyleComplianceAgent` e `OutputManager` ai Modelli Tipizzati
+  - [x] **Sotto-Task 3.2**: Adeguamento Agenti, `StyleComplianceAgent` e `OutputManager` ai Modelli Tipizzati
 
 ### Fase 2: Infrastruttura, Rete & Provider AI (OpenRouter + Subagent Antigravity)
 - [ ] **Task 4**: Rotazione dei Log e Gestione Sicura della Cartella `logs/`
