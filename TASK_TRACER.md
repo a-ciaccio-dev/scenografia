@@ -7,16 +7,16 @@ Le attività sono ordinate secondo una sequenza **Bottom-Up sinergica** (5 Fasi)
 
 ## 📊 Riepilogo Avanzamento
 
-**Progresso Globale:** `10 / 17` step operativi completati (**59%**)
+**Progresso Globale:** `11 / 17` step operativi completati (**65%**)
 
 ```text
-[██████████░░░░░░░] 59% (10/17 Task & Sotto-Task)
+[███████████░░░░░░] 65% (11/17 Task & Sotto-Task)
 ```
 
 - **Branch attivo**: `antigravity`
 - **Task principali**: `7 / 11`
-- **Step operativi**: `10 / 17`
-- **Stato attuale**: 🚀 In corso — Fase 3 (Sotto-Task 8.1 in avvio)
+- **Step operativi**: `11 / 17`
+- **Stato attuale**: 🚀 In corso — Fase 3 (Sotto-Task 8.2 in avvio)
 
 ---
 
@@ -35,7 +35,7 @@ Le attività sono ordinate secondo una sequenza **Bottom-Up sinergica** (5 Fasi)
 | **2. Rete & AI** | **Task 6.2** | Creazione dei Subagent e della Skill Nativa Antigravity | Alta | ✅ Completato | 193 passed (0 warnings) | `3c17cd5` | 2026-11-07 18:03 |
 | **3. Architettura** | **Task 7.1** | Creazione del package `src/scenografia/services/` ed estrazione delle Pipeline | Alta | ✅ Completato | 193 passed (0 warnings) | `5915c64` | 2026-11-07 18:06 |
 | **3. Architettura** | **Task 7.2** | Aggiornamento di CLI e Web UI al nuovo Service Layer | Alta | ✅ Completato | 195 passed (0 warnings) | `52f7887` | 2026-11-07 18:09 |
-| **3. Architettura** | **Task 8.1** | Estrazione dei Componenti UI in `src/scenografia/web/` | Alta | ⏳ Da fare | — | — | — |
+| **3. Architettura** | **Task 8.1** | Estrazione dei Componenti UI in `src/scenografia/web/` | Alta | ✅ Completato | 199 passed (0 warnings) | `8410b9a` | 2026-11-07 18:14 |
 | **3. Architettura** | **Task 8.2** | Implementazione della Galleria Storico (`history_gallery.py`) | Alta | ⏳ Da fare | — | — | — |
 | **4. Feature** | **Task 9.1** | Sviluppo del modulo `SvgVectorizer` (`src/scenografia/tools/svg_vectorizer.py`) | Alta | ⏳ Da fare | — | — | — |
 | **4. Feature** | **Task 9.2** | Integrazione dell'Export SVG in `OutputManager`, Service Layer, CLI e Web UI | Alta | ⏳ Da fare | — | — | — |
@@ -67,7 +67,7 @@ Le attività sono ordinate secondo una sequenza **Bottom-Up sinergica** (5 Fasi)
   - [x] **Sotto-Task 7.1**: Creazione del package `src/scenografia/services/` ed estrazione delle Pipeline
   - [x] **Sotto-Task 7.2**: Aggiornamento di CLI e Web UI al nuovo Service Layer
 - [ ] **Task 8**: Modularizzazione della Web UI Streamlit e Galleria Storico
-  - [ ] **Sotto-Task 8.1**: Estrazione dei Componenti UI in `src/scenografia/web/`
+  - [x] **Sotto-Task 8.1**: Estrazione dei Componenti UI in `src/scenografia/web/`
   - [ ] **Sotto-Task 8.2**: Implementazione della Galleria Storico (`history_gallery.py`)
 
 ### Fase 4: Nuove Funzionalità Scenografiche (Innestate sull'Architettura Pulita)
