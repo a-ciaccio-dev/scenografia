@@ -169,5 +169,40 @@ def models() -> None:
     typer.echo("\n".join(lines))
 
 
+@app.command()
+def vectorize(
+    image: str = typer.Argument(..., help="Path to raster image (PNG, JPEG) to vectorize."),
+    output: Optional[str] = typer.Option(None, "--output", "-o", help="Optional output SVG path."),
+    mode: str = typer.Option("color", "--mode", "-m", help="Vectorization mode: 'color', 'monochrome', or 'lineart'."),
+    layer: str = typer.Option("all", "--layer", "-l", help="Scenic depth layer: 'all', 'foreground', 'midground', 'background'."),
+    max_colors: int = typer.Option(12, "--max-colors", "-c", help="Maximum color clusters for color quantization."),
+) -> None:
+    """Vectorize a raster image into an SVG document with theatrical scenic layer tags."""
+    from scenografia.tools.svg_vectorizer import SvgVectorizer
+
+    image_path = Path(image)
+    if not image_path.exists():
+        typer.echo(f"Error: image not found: {image_path.as_posix()}", err=True)
+        raise typer.Exit(code=2)
+
+    vectorizer = SvgVectorizer(max_colors=max_colors)
+    output_path = Path(output) if output else None
+
+    try:
+        saved_svg = vectorizer.vectorize_image(
+            image_path=image_path,
+            output_svg_path=output_path,
+            mode=mode,
+            layer=layer,
+        )
+        typer.echo(f"Vector SVG saved to {saved_svg.as_posix()}")
+        raise typer.Exit(code=0)
+    except typer.Exit:
+        raise
+    except Exception as exc:
+        typer.echo(f"Error during vectorization: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+
+
 if __name__ == "__main__":
     app()
