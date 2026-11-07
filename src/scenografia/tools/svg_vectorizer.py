@@ -142,7 +142,14 @@ class SvgVectorizer:
         data = img.reshape((-1, 3)).astype(np.float32)
 
         criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-        k = min(self.max_colors, max(3, int(len(np.unique(img)) / 100)))
+        # Fast vectorized 24-bit color packing to determine exact unique RGB color count
+        packed_colors = (
+            img[:, :, 0].astype(np.int32)
+            + (img[:, :, 1].astype(np.int32) << 8)
+            + (img[:, :, 2].astype(np.int32) << 16)
+        )
+        unique_color_count = len(np.unique(packed_colors))
+        k = max(2, min(self.max_colors, unique_color_count))
         _, labels, centers = cv2.kmeans(data, k, None, criteria, 3, cv2.KMEANS_PP_CENTERS)
 
         centers = np.uint8(centers)

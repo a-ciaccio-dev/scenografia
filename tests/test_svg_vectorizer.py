@@ -78,3 +78,29 @@ def test_contour_to_svg_path_short_contour():
     vectorizer = SvgVectorizer()
     short_contour = np.array([[[10, 10]], [[20, 20]]])
     assert vectorizer._contour_to_svg_path(short_contour) == ""
+
+
+def test_svg_vectorizer_kmeans_multiple_colors(tmp_path):
+    """Verify that images with multiple colors generate multi-cluster SVG without 3-color cap."""
+    multi_img_path = tmp_path / "multi_scene.png"
+    img = Image.new("RGB", (300, 200), color=(255, 255, 255))
+    draw = ImageDraw.Draw(img)
+    # Distinct colored blocks
+    draw.rectangle([10, 10, 80, 80], fill=(255, 0, 0))      # Red
+    draw.rectangle([90, 10, 160, 80], fill=(0, 255, 0))     # Green
+    draw.rectangle([170, 10, 240, 80], fill=(0, 0, 255))    # Blue
+    draw.rectangle([10, 100, 80, 170], fill=(255, 255, 0))  # Yellow
+    draw.rectangle([90, 100, 160, 170], fill=(255, 0, 255)) # Magenta
+    img.save(multi_img_path)
+
+    vectorizer = SvgVectorizer(min_contour_area=5.0, max_colors=6)
+    out_svg = tmp_path / "multi_vector.svg"
+    vectorizer.vectorize_image(multi_img_path, output_svg_path=out_svg, mode="color")
+
+    content = out_svg.read_text(encoding="utf-8")
+    assert out_svg.exists()
+    # Count distinct fills in SVG
+    import re
+    fills = set(re.findall(r'fill="([^"]+)"', content))
+    # Should have more than 3 distinct color fills (background rect + multiple color clusters)
+    assert len(fills) >= 4
