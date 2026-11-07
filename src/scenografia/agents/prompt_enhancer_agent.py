@@ -1,15 +1,20 @@
 """Agent for enhancing simple prompts into detailed theatrical scene descriptions."""
 
-from typing import Optional
+from typing import Optional, Union
 from scenografia.tools.openrouter_client import OpenRouterClient
+from scenografia.providers.base import BaseTextProvider
+from scenografia.providers.factory import get_text_provider
 from scenografia.config import Config
 
 
 class PromptEnhancerAgent:
     """Enhance a user's simple scenic description into a rich theatrical prompt."""
 
-    def __init__(self, client: Optional[OpenRouterClient] = None):
-        self.client = client or OpenRouterClient()
+    def __init__(self, client: Optional[Union[BaseTextProvider, OpenRouterClient]] = None):
+        if client is not None:
+            self.client = client
+        else:
+            self.client = get_text_provider()
 
     def enhance_prompt(
         self,

@@ -13,14 +13,16 @@ from scenografia.schemas.brief_schema import StructuredBrief, PromptPackage
 from typing import Union
 from scenografia.schemas.validation_schema import GenerationMetadata
 from scenografia.tools.openrouter_client import OpenRouterClient
+from scenografia.providers.base import BaseImageProvider
+from scenografia.providers.factory import get_image_provider
 from scenografia.tools.output_manager import OutputManager
 
 
 class ImageGenerationAgent:
     """Provider-facing image generation agent."""
 
-    def __init__(self, client: OpenRouterClient | None = None):
-        self.client = client or OpenRouterClient()
+    def __init__(self, client: Union[BaseImageProvider, OpenRouterClient] | None = None):
+        self.client = client if client is not None else get_image_provider()
 
     def generate(self, request: GenerationRequest, prompt_package: Union[PromptPackage, dict], brief: Union[StructuredBrief, dict], input_image_bytes: bytes | None = None):
         """Send the final prompt package to OpenRouter."""
