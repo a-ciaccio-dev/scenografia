@@ -6,7 +6,7 @@ text prompts or sketch input into a structured generation brief.
 """
 
 from typing import Optional, List
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from .generation_schema import Orientation, GenerationMode
 
 
@@ -63,9 +63,9 @@ class StructuredBrief(BaseModel):
         description="Selected User Style name"
     )
     
-    class Config:
-        use_enum_values = False
-        json_schema_extra = {
+    model_config = ConfigDict(
+        use_enum_values=False,
+        json_schema_extra={
             "example": {
                 "scene_description": "Mystical forest clearing with ancient stone pillars",
                 "style_direction": "theatrical fantasy",
@@ -76,3 +76,4 @@ class StructuredBrief(BaseModel):
                 "constraints": ["no photorealism", "no gradients"]
             }
         }
+    )

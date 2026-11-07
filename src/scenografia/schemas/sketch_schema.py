@@ -6,7 +6,7 @@ and optional AI refinement.
 """
 
 from typing import Optional, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class SketchInterpretation(BaseModel):
@@ -48,8 +48,8 @@ class SketchInterpretation(BaseModel):
         description="Details about preprocessing steps"
     )
     
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "processed_sketch_path": "output/2026-06-21_1430_forest/processed_sketch.png",
                 "scene_elements": ["pillars", "forest canopy", "ground level"],
@@ -62,3 +62,4 @@ class SketchInterpretation(BaseModel):
                 }
             }
         }
+    )

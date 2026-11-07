@@ -6,8 +6,8 @@ style compliance, and artifact completeness.
 """
 
 from typing import Optional, List, Dict, Any
-from datetime import datetime
-from pydantic import AliasChoices, BaseModel, Field
+from datetime import datetime, timezone
+from pydantic import AliasChoices, BaseModel, Field, ConfigDict
 from .generation_schema import Orientation, GenerationMode
 
 
@@ -21,7 +21,7 @@ class GenerationMetadata(BaseModel):
     
     # Identification
     run_id: str = Field(description="Unique run identifier")
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     
     # Request information
     input_type: str = Field(description="'text' or 'sketch'")
@@ -54,10 +54,9 @@ class GenerationMetadata(BaseModel):
     style_prompt_additions: Optional[str] = Field(None, description="Style prompt additions used")
     style_negative_additions: Optional[str] = Field(None, description="Style negative additions used")
     
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
+    model_config = ConfigDict(
+        use_enum_values=False,
+    )
 
 
 class ValidationReport(BaseModel):
@@ -70,7 +69,7 @@ class ValidationReport(BaseModel):
     
     # Validation metadata
     report_id: str = Field(description="Report identifier")
-    validated_at: datetime = Field(default_factory=datetime.utcnow)
+    validated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     run_id: str = Field(description="Associated generation run ID")
     
     # Orientation capture and validation
@@ -110,11 +109,8 @@ class ValidationReport(BaseModel):
         description="Suggestions for improvement"
     )
     
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "report_id": "val_20260621_001",
                 "run_id": "gen_20260621_001",
@@ -131,3 +127,4 @@ class ValidationReport(BaseModel):
                 }
             }
         }
+    )

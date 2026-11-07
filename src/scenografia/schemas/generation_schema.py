@@ -7,7 +7,7 @@ and mode/orientation tracking.
 
 from enum import Enum
 from typing import Optional, Literal
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class GenerationMode(str, Enum):
@@ -45,9 +45,9 @@ class GenerationRequest(BaseModel):
     # Selected style
     selected_style: Optional[str] = Field("Default", description="Selected User Style name")
     
-    class Config:
-        use_enum_values = False
-        json_schema_extra = {
+    model_config = ConfigDict(
+        use_enum_values=False,
+        json_schema_extra={
             "example": {
                 "input_type": "text",
                 "text_prompt": "A mystical forest with ancient stone pillars",
@@ -55,6 +55,7 @@ class GenerationRequest(BaseModel):
                 "orientation": "landscape"
             }
         }
+    )
 
 
 class ImageGenerationResponse(BaseModel):
@@ -66,5 +67,4 @@ class ImageGenerationResponse(BaseModel):
     model_used: str
     request_id: str
     
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
