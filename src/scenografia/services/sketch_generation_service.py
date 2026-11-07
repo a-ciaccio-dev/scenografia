@@ -1,0 +1,149 @@
+"""Sketch-mode theatrical scenic generation service."""
+
+from pathlib import Path
+from collections.abc import Callable
+from typing import Optional, Dict, Any, Union
+
+from scenografia.agents.brief_agent import BriefAgent
+from scenografia.agents.prompt_engineer_agent import PromptEngineerAgent
+from scenografia.agents.sketch_interpreter_agent import SketchInterpreterAgent
+from scenografia.agents.style_compliance_agent import StyleComplianceAgent
+from scenografia.schemas.generation_schema import GenerationMode, GenerationRequest, Orientation
+from scenografia.schemas.validation_schema import GenerationMetadata
+from scenografia.tools.output_manager import OutputManager
+from scenografia.tools.style_validator import StyleValidator
+
+
+class SketchGenerationService:
+    """Orchestrate the sketch-mode generation pipeline end-to-end."""
+
+    def __init__(
+        self,
+        brief_agent: Optional[BriefAgent] = None,
+        prompt_engineer: Optional[PromptEngineerAgent] = None,
+        image_generator: Any = None,
+        style_validator: Optional[StyleComplianceAgent] = None,
+        output_manager: Optional[OutputManager] = None,
+        sketch_interpreter: Optional[SketchInterpreterAgent] = None,
+    ):
+        self.brief_agent = brief_agent or BriefAgent()
+        self.prompt_engineer = prompt_engineer or PromptEngineerAgent()
+        self.image_generator = image_generator
+        self.style_validator = style_validator or StyleComplianceAgent()
+        self.output_manager = output_manager or OutputManager()
+        self.sketch_interpreter = sketch_interpreter or SketchInterpreterAgent()
+
+    def _get_image_generator(self):
+        """Instantiate provider agent lazily for testability."""
+        if self.image_generator is None:
+            from scenografia.agents.image_generation_agent import ImageGenerationAgent
+            self.image_generator = ImageGenerationAgent()
+        return self.image_generator
+
+    def run_sketch_generation(
+        self,
+        sketch_path: str,
+        style: str,
+        mode: Union[GenerationMode, str],
+        orientation: Orientation,
+        model: Optional[str],
+        disable_ai_refinement: bool,
+        style_name: Optional[str] = "Default",
+        progress_callback: Optional[Callable[[str], None]] = None,
+        input_image_bytes: Optional[bytes] = None,
+    ) -> Dict[str, Any]:
+        """Execute the sketch-mode generation pipeline end to end."""
+        if progress_callback:
+            progress_callback("brief")
+        normalized_mode = mode if isinstance(mode, GenerationMode) else GenerationMode(mode)
+        request = GenerationRequest(
+            input_type="sketch",
+            sketch_path=sketch_path,
+            style_guidance=style,
+            mode=normalized_mode,
+            orientation=orientation,
+            model_id=model,
+            refine_sketch=not disable_ai_refinement,
+            selected_style=style_name or "Default",
+        )
+        output_dir = OutputManager.create_output_directory(Path(sketch_path).stem)
+        interpretation = self.sketch_interpreter.interpret(request, output_dir)
+        brief = self.brief_agent.create_from_sketch(request, interpretation)
+        
+        if progress_callback:
+            progress_callback("prompt")
+        prompt_package = self.prompt_engineer.build_prompt_package(brief)
+        return self._complete_generation(
+            request,
+            brief,
+            prompt_package,
+            interpretation,
+            output_dir=output_dir,
+            progress_callback=progress_callback,
+            input_image_bytes=input_image_bytes
+        )
+
+    def _complete_generation(
+        self,
+        request,
+        brief,
+        prompt_package,
+        interpretation,
+        output_dir=None,
+        progress_callback=None,
+        input_image_bytes=None
+    ) -> Dict[str, Any]:
+        """Finish provider generation and artifact persistence for sketch mode."""
+        max_attempts = 3
+        response = None
+        for attempt in range(max_attempts):
+            style_valid, style_issues = StyleValidator.validate_style_contract(prompt_package["final_prompt"])
+            neg_valid, neg_issues = StyleValidator.validate_negative_constraints(prompt_package["negative_prompt"])
+            issues = [*style_issues, *neg_issues]
+            
+            if issues:
+                if progress_callback:
+                    progress_callback("refine")
+                if hasattr(self.prompt_engineer, "refine_prompt_package"):
+                    prompt_package = self.prompt_engineer.refine_prompt_package(prompt_package, issues)
+            
+            try:
+                if progress_callback:
+                    progress_callback("generate")
+                generator = self._get_image_generator()
+                response = generator.generate(request, prompt_package, brief, input_image_bytes=input_image_bytes)
+                break
+            except Exception as e:
+                if attempt == max_attempts - 1:
+                    raise e
+                if hasattr(self.prompt_engineer, "refine_prompt_package"):
+                    prompt_package = self.prompt_engineer.refine_prompt_package(prompt_package, [f"Error: {str(e)}"])
+
+        if progress_callback:
+            progress_callback("validate")
+        validation_report = self.style_validator.validate_text_run(brief, prompt_package, response)
+        metadata = GenerationMetadata(
+            run_id=response.request_id,
+            input_type="sketch",
+            original_prompt=request.style_guidance or request.sketch_path or "sketch input",
+            orientation=request.orientation,
+            generation_mode=request.mode,
+            model_id=response.model_used,
+            brief=brief,
+            final_prompt=prompt_package["final_prompt"],
+            negative_prompt=prompt_package["negative_prompt"],
+            image_url=response.image_url,
+        )
+        if progress_callback:
+            progress_callback("persist")
+        result = self.output_manager.persist_text_run(
+            brief=brief,
+            prompt_package=prompt_package,
+            response=response,
+            validation_report=validation_report,
+            metadata=metadata,
+            output_dir=output_dir,
+            processed_sketch_path=Path(interpretation.processed_sketch_path),
+        )
+        result["processed_sketch_path"] = Path(interpretation.processed_sketch_path)
+        return result
