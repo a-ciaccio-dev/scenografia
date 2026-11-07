@@ -110,10 +110,10 @@ class TestImageGeneration:
     
     @patch('scenografia.tools.openrouter_client.httpx.Client')
     def test_generate_image_api_error(self, mock_client_class):
-        """Should handle API errors without exposing API key."""
+        """Should handle API errors preserving detail and redacting API key if leaked."""
         mock_response = Mock()
         mock_response.status_code = 401
-        mock_response.text = "Unauthorized"
+        mock_response.text = "Unauthorized access with key test-key"
         
         mock_client = MagicMock()
         mock_client.post.return_value = mock_response
@@ -130,6 +130,8 @@ class TestImageGeneration:
         
         assert response.error is not None
         assert "401" in response.error
+        assert "Unauthorized access" in response.error
+        assert "[REDACTED]" in response.error
         assert "test-key" not in response.error  # API key must not be exposed
     
     @patch('scenografia.tools.openrouter_client.httpx.Client')

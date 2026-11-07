@@ -137,9 +137,14 @@ class OpenRouterClient:
             # Handle HTTP errors
             if response.status_code != 200:
                 # Sanitize error message (remove API key)
-                error_text = response.text[:500]  # Limit error text length
+                error_text = (response.text or "")[:500]
+                if self.api_key and self.api_key in error_text:
+                    error_text = error_text.replace(self.api_key, "[REDACTED]")
+                error_msg = f"API error: {response.status_code}"
+                if error_text.strip():
+                    error_msg += f" - {error_text.strip()}"
                 return ImageGenerationResponse(
-                    error=f"API error: {response.status_code}",
+                    error=error_msg,
                     model_used=model_id,
                     request_id="unknown"
                 )
