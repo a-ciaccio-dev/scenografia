@@ -7,16 +7,16 @@ Le attività sono ordinate secondo una sequenza **Bottom-Up sinergica** (5 Fasi)
 
 ## 📊 Riepilogo Avanzamento
 
-**Progresso Globale:** `7 / 17` step operativi completati (**41%**)
+**Progresso Globale:** `8 / 17` step operativi completati (**47%**)
 
 ```text
-[███████░░░░░░░░░░] 41% (7/17 Task & Sotto-Task)
+[████████░░░░░░░░░] 47% (8/17 Task & Sotto-Task)
 ```
 
 - **Branch attivo**: `antigravity`
-- **Task principali**: `5 / 11`
-- **Step operativi**: `7 / 17`
-- **Stato attuale**: 🚀 In corso — Fase 2 (Sotto-Task 6.2 in avvio)
+- **Task principali**: `6 / 11`
+- **Step operativi**: `8 / 17`
+- **Stato attuale**: 🚀 In corso — Fase 3 (Sotto-Task 7.1 in avvio)
 
 ---
 
@@ -32,7 +32,7 @@ Le attività sono ordinate secondo una sequenza **Bottom-Up sinergica** (5 Fasi)
 | **2. Rete & AI** | **Task 4** | Rotazione dei Log (`RotatingFileHandler`) e Gestione Cartella `logs/` | Bassa | ✅ Completato | 184 passed (0 warnings) | `6e7b9f5` | 2026-11-07 17:51 |
 | **2. Rete & AI** | **Task 5** | Resilienza di Rete, Retry con Backoff (`tenacity`) e Timeout Configurabile | Media | ✅ Completato | 186 passed (0 warnings) | `43393a2` | 2026-11-07 17:58 |
 | **2. Rete & AI** | **Task 6.1** | Definizione dei Protocolli Provider (`src/scenografia/providers/`) | Alta | ✅ Completato | 191 passed (0 warnings) | `d0bdca9` | 2026-11-07 18:02 |
-| **2. Rete & AI** | **Task 6.2** | Creazione dei Subagent e della Skill Nativa Antigravity | Alta | ⏳ Da fare | — | — | — |
+| **2. Rete & AI** | **Task 6.2** | Creazione dei Subagent e della Skill Nativa Antigravity | Alta | ✅ Completato | 193 passed (0 warnings) | `3c17cd5` | 2026-11-07 18:03 |
 | **3. Architettura** | **Task 7.1** | Creazione del package `src/scenografia/services/` ed estrazione delle Pipeline | Alta | ⏳ Da fare | — | — | — |
 | **3. Architettura** | **Task 7.2** | Aggiornamento di CLI e Web UI al nuovo Service Layer | Alta | ⏳ Da fare | — | — | — |
 | **3. Architettura** | **Task 8.1** | Estrazione dei Componenti UI in `src/scenografia/web/` | Alta | ⏳ Da fare | — | — | — |
@@ -58,9 +58,9 @@ Le attività sono ordinate secondo una sequenza **Bottom-Up sinergica** (5 Fasi)
 ### Fase 2: Infrastruttura, Rete & Provider AI (OpenRouter + Subagent Antigravity)
 - [x] **Task 4**: Rotazione dei Log e Gestione Sicura della Cartella `logs/`
 - [x] **Task 5**: Resilienza di Rete, Retry con Backoff e Timeout Configurabile
-- [ ] **Task 6**: Astrazione Provider AI e Trasformazione in Subagent di Antigravity
+- [x] **Task 6**: Astrazione Provider AI e Trasformazione in Subagent di Antigravity
   - [x] **Sotto-Task 6.1**: Definizione dei Protocolli Provider (`src/scenografia/providers/`)
-  - [ ] **Sotto-Task 6.2**: Creazione dei Subagent e della Skill Nativa Antigravity
+  - [x] **Sotto-Task 6.2**: Creazione dei Subagent e della Skill Nativa Antigravity
 
 ### Fase 3: Architettura Modulare (Service Layer & Web UI Componentizzata)
 - [ ] **Task 7**: Riorganizzazione Architetturale e Separazione del Service Layer
