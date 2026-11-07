@@ -94,7 +94,9 @@ class TextGenerationService:
                 response = generator.generate(request, prompt_package, brief, input_image_bytes=input_image_bytes)
                 break
             except Exception as e:
-                if attempt == max_attempts - 1:
+                err_text = str(e).lower()
+                is_fatal = any(term in err_text for term in ["401", "402", "403", "404", "unauthorized", "payment required", "forbidden", "not found", "quota"])
+                if is_fatal or attempt == max_attempts - 1:
                     raise e
                 if hasattr(self.prompt_engineer, "refine_prompt_package"):
                     prompt_package = self.prompt_engineer.refine_prompt_package(prompt_package, [f"Error: {str(e)}"])
