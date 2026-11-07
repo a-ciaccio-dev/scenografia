@@ -15,6 +15,7 @@ from scenografia.logger import setup_logger
 from scenografia.web import (
     display_generation_results,
     on_regenerate,
+    render_history_gallery,
     render_sidebar_settings,
     render_text_mode_inputs,
 )
@@ -294,32 +295,8 @@ def main():
     if st.session_state.active_generation:
         display_generation_results(**st.session_state.active_generation)
 
-    # 4. Gallery Grid: Recent Runs
-    st.divider()
-    st.subheader("📚 Galleria Scenografica (Run Recenti)")
-    output_dir = Path("output")
-    recent_runs = list_recent_runs(output_dir, n=9)
-
-    if not recent_runs:
-        st.info("Nessun run trovato ancora.")
-    else:
-        cols = st.columns(3)
-        for idx, run_path in enumerate(recent_runs):
-            col = cols[idx % 3]
-            with col:
-                with st.container(border=True):
-                    final_image = find_final_image(run_path)
-                    if final_image:
-                        st.image(str(final_image), use_container_width=True)
-
-                    st.markdown(f"**{run_path.name[:25]}...**")
-
-                    report = read_validation_report(run_path)
-                    if report:
-                        val = report.get("orientation_valid", False)
-                        style_val = report.get("style_contract_applied", False)
-                        status_badge = "🟢 Conforme" if (val and style_val) else "🟡 Avviso"
-                        st.caption(f"{status_badge} | {report.get('orientation', 'N/A')}")
+    # 4. History Gallery Component
+    render_history_gallery("output")
 
 
 if __name__ == "__main__":
