@@ -8,16 +8,16 @@ Alla fine di ogni task viene eseguita la suite di test dedicata e globale, segui
 
 ## 📊 Riepilogo Avanzamento
 
-**Progresso Globale:** `24 / 31` step operativi completati (**77%**)
+**Progresso Globale:** `25 / 31` step operativi completati (**81%**)
 
 ```text
-[███████████████░░░░░] 77% (24/31 Task & Sotto-Task)
+[████████████████░░░░] 81% (25/31 Task & Sotto-Task)
 ```
 
 - **Branch attivo**: `antigravity`
-- **Fasi totali**: 7 (Fasi 1-6 completate, Fase 7 pianificata)
-- **Step operativi totali**: `31` (`24` completati, `7` pianificati)
-- **Stato attuale**: 🚀 Fase 7: Transizione Nativa ad Antigravity & Hardening Risorse avviata.
+- **Fasi totali**: 7 (Fasi 1-6 completate, Fase 7 in corso)
+- **Step operativi totali**: `31` (`25` completati, `6` rimanenti)
+- **Stato attuale**: 🚀 Fase 7: Task 16 completato con successo.
 
 ---
 
@@ -50,8 +50,8 @@ Alla fine di ogni task viene eseguita la suite di test dedicata e globale, segui
 | **6. Hardening** | **Task 14** | Risoluzione al secondo e anti-collisione directory run (`list_recent_runs`) | Media | ✅ Completato | 223 passed (81% cov) | `067183d` | 2026-11-07 19:12 |
 | **6. Hardening** | **Task 15.1** | Mantenimento di Layer ed Export SVG nella Rigenerazione Web UI | Media | ✅ Completato | 224 passed (81% cov) | `30b5b98` | 2026-11-07 19:14 |
 | **6. Hardening** | **Task 15.2** | Comando CLI standalone `scenografia vectorize` | Media | ✅ Completato | 227 passed (81% cov) | `2d16095` | 2026-11-07 19:25 |
-| **7. Antigravity** | **Task 16** | Disaccoppiamento da OpenRouter e Antigravity come Provider Default | Media | ⏳ Pianificato | In attesa | — | — |
-| **7. Antigravity** | **Task 17.1** | Potenziamento di `AntigravityBridgeProvider` per Generazione Immagine Teatrale | Medio-Alta | ⏳ Pianificato | In attesa | — | — |
+| **7. Antigravity** | **Task 16** | Disaccoppiamento da OpenRouter e Antigravity come Provider Default | Media | ✅ Completato | 229 passed (81% cov) | `7820dfb` | 2026-11-07 20:47 |
+| **7. Antigravity** | **Task 17.1** | Potenziamento di `AntigravityBridgeProvider` per Generazione Immagine Teatrale | Medio-Alta | ⏳ In corso | In attesa | — | — |
 | **7. Antigravity** | **Task 17.2** | Generazione Prompt Scenografico e Refining Nativo in `PromptEnhancerAgent` | Medio-Alta | ⏳ Pianificato | In attesa | — | — |
 | **7. Antigravity** | **Task 18.1** | Aggiornamento CLI (`scenografia models` e `generate`) ad Antigravity | Media | ⏳ Pianificato | In attesa | — | — |
 | **7. Antigravity** | **Task 18.2** | Aggiornamento Web UI (`web_app.py` e componenti) ad Antigravity senza chiavi esterne | Media | ⏳ Pianificato | In attesa | — | — |
@@ -106,7 +106,7 @@ Alla fine di ogni task viene eseguita la suite di test dedicata e globale, segui
 - [x] **Task 15.2**: Comando CLI standalone `scenografia vectorize`
 
 ### Fase 7: Transizione Nativa ad Antigravity & Hardening Risorse
-- [ ] **Task 16**: Disaccoppiamento da OpenRouter e Antigravity come Provider Default
+- [x] **Task 16**: Disaccoppiamento da OpenRouter e Antigravity come Provider Default
 - [ ] **Task 17**: Potenziamento di `AntigravityBridgeProvider` per Generazione Immagine e Testo
   - [ ] **Sotto-Task 17.1**: Rendering di canvas scenografico e integrazione subagent con metadati completi
   - [ ] **Sotto-Task 17.2**: Generazione Prompt Scenografico e Refining Nativo in `PromptEnhancerAgent`
