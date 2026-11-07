@@ -102,7 +102,10 @@ class SketchPreprocessor:
         return cleaned
     
     @staticmethod
-    def preprocess_sketch(sketch_path: Path) -> Optional[np.ndarray]:
+    def preprocess_sketch(
+        sketch_path: Path,
+        image: Optional[np.ndarray] = None
+    ) -> Optional[np.ndarray]:
         """
         Fully preprocess a sketch image.
         
@@ -118,17 +121,19 @@ class SketchPreprocessor:
         Returns:
             Preprocessed image array or None
         """
-        image = SketchPreprocessor.load_sketch(sketch_path)
+        if image is None:
+            image = SketchPreprocessor.load_sketch(sketch_path)
         if image is None:
             return None
-        
-        # Convert to grayscale
+        return SketchPreprocessor.preprocess_image(image)
+
+    @staticmethod
+    def preprocess_image(image: np.ndarray) -> Optional[np.ndarray]:
+        """Preprocess an in-memory sketch image array without disk I/O."""
+        if image is None:
+            return None
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        
-        # Enhance contrast
         enhanced = SketchPreprocessor.enhance_contrast(gray)
-        
-        # Convert to binary
         bw = cv2.adaptiveThreshold(
             enhanced,
             255,
@@ -137,11 +142,7 @@ class SketchPreprocessor:
             11,
             2
         )
-        
-        # Clean
-        cleaned = SketchPreprocessor.clean_sketch(bw)
-        
-        return cleaned
+        return SketchPreprocessor.clean_sketch(bw)
     
     @staticmethod
     def save_processed_sketch(

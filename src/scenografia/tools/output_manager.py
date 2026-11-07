@@ -240,10 +240,10 @@ class OutputManager:
         Returns:
             Path to saved file
         """
-        image = Image.open(source_path)
-        output_path = output_dir / filename
-        image.save(output_path)
-        return output_path
+        with Image.open(source_path) as image:
+            output_path = output_dir / filename
+            image.save(output_path)
+            return output_path
     
     @staticmethod
     def save_json_artifact(

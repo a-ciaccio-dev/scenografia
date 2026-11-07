@@ -202,11 +202,11 @@ class StyleValidator:
             metrics["exists"] = True
             metrics["size"] = image_path.stat().st_size
             
-            # Open image and check properties
-            image = Image.open(image_path)
-            metrics["dimensions"] = image.size
-            metrics["file_format"] = image.format
-            metrics["has_color"] = image.mode in ["RGB", "RGBA"]
+            # Open image and check properties safely with context manager
+            with Image.open(image_path) as image:
+                metrics["dimensions"] = image.size
+                metrics["file_format"] = image.format
+                metrics["has_color"] = image.mode in ["RGB", "RGBA"]
             
             # Basic validation
             is_valid = (

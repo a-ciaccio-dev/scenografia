@@ -19,10 +19,19 @@ class SketchInterpreterAgent:
         if not request.sketch_path:
             raise ValueError("Sketch path is required for sketch interpretation")
 
+        import inspect
         sketch_path = Path(request.sketch_path)
         original_image = SketchPreprocessor.load_sketch(sketch_path)
-        processed_image = SketchPreprocessor.preprocess_sketch(sketch_path)
-        if original_image is None or processed_image is None:
+        if original_image is None:
+            raise ValueError(f"Unable to preprocess sketch: {sketch_path}")
+
+        sig = inspect.signature(SketchPreprocessor.preprocess_sketch)
+        if "image" in sig.parameters:
+            processed_image = SketchPreprocessor.preprocess_sketch(sketch_path, image=original_image)
+        else:
+            processed_image = SketchPreprocessor.preprocess_sketch(sketch_path)
+
+        if processed_image is None:
             raise ValueError(f"Unable to preprocess sketch: {sketch_path}")
 
         output_dir.mkdir(parents=True, exist_ok=True)

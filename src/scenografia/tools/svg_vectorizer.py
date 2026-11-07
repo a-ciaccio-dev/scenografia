@@ -80,8 +80,8 @@ class SvgVectorizer:
         img = cv2.imread(str(in_path))
         if img is None:
             # Fallback to PIL in case of Unicode path issues on Windows
-            pil_img = Image.open(in_path).convert("RGB")
-            img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
+            with Image.open(in_path) as pil_img:
+                img = cv2.cvtColor(np.array(pil_img.convert("RGB")), cv2.COLOR_RGB2BGR)
 
         height, width = img.shape[:2]
 
