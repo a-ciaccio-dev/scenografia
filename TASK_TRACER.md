@@ -1,28 +1,29 @@
 # Task Tracer — Refactoring & Evoluzione Scenografia (`antigravity`)
 
 Questo file traccia in tempo reale lo stato di avanzamento dei Task e Sotto-Task previsti dal Piano di Implementazione sul branch `antigravity`.
-Le attività sono ordinate secondo una sequenza **Bottom-Up sinergica** (5 Fasi) per azzerare conflitti e doppie lavorazioni.
+Le attività sono ordinate secondo una sequenza **Bottom-Up sinergica** per azzerare conflitti e doppie lavorazioni.
+Alla fine di ogni task viene eseguita la suite di test dedicata e globale, seguito da commit, push e aggiornamento di questo documento.
 
 ---
 
 ## 📊 Riepilogo Avanzamento
 
-**Progresso Globale:** `17 / 17` step operativi completati (**100%**)
+**Progresso Globale:** `17 / 24` step operativi completati (**71%**)
 
 ```text
-[██████████████████] 100% (17/17 Task & Sotto-Task)
+[██████████████░░░░░░] 71% (17/24 Task & Sotto-Task)
 ```
 
 - **Branch attivo**: `antigravity`
-- **Task principali**: `11 / 11`
-- **Step operativi**: `17 / 17`
-- **Stato attuale**: 🎉 Completato con successo! Tutti i task e sotto-task sono stati implementati, testati e sincronizzati sul branch `antigravity`.
+- **Fasi totali**: 6 (Fasi 1-5 completate, Fase 6 in corso)
+- **Step operativi totali**: `24` (`17` completati, `7` da eseguire)
+- **Stato attuale**: 🚀 Pronto per l'avvio della Fase 6 (Task 12.1)
 
 ---
 
-## 📋 Tabella di Tracciamento Dettagliata (Ordine Sinergico Bottom-Up)
+## 📋 Tabella di Tracciamento Dettagliata
 
-| Fase | ID | Task / Sotto-Task | Difficoltà | Stato | Test (`pytest`) | Commit Hash | Data/Ora Completamento |
+| Fase | ID | Task / Sotto-Task | Difficoltà | Stato | Test Verificati (`pytest`) | Commit Hash | Data/Ora Completamento |
 | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Init** | **Init** | Creazione e push branch `antigravity` | Bassa | ✅ Completato | — | `c04596d` | 2026-11-07 12:32 |
 | **1. Fondamenta** | **Task 1** | Aggiornamento Schemi a Pydantic V2 e Standard Python 3.12+ | Bassa | ✅ Completato | 183 passed (0 warnings) | `e7e0c76` | 2026-11-07 17:35 |
@@ -42,6 +43,13 @@ Le attività sono ordinate secondo una sequenza **Bottom-Up sinergica** (5 Fasi)
 | **4. Feature** | **Task 10.1** | Estensione di `PromptEnhancerAgent` e `PromptTemplates` per i Piani di Profondità | Alta | ✅ Completato | 211 passed (0 warnings) | `160a4ce` | 2026-11-07 18:38 |
 | **4. Feature** | **Task 10.2** | Integrazione del Selettore Piani di Profondità in Service Layer, CLI e Web UI | Alta | ✅ Completato | 213 passed (0 warnings) | `d2fff78` | 2026-11-07 18:44 |
 | **5. CI/CD** | **Task 11** | Pipeline CI/CD (GitHub Actions) e Configurazione Linter/Type-Checker | Media | ✅ Completato | 213 passed (77% cov) | `85c770f` | 2026-11-07 18:47 |
+| **6. Hardening** | **Task 12.1** | Correzione bug `export_svg` in `SketchGenerationService` + test end-to-end | Media | ⏳ In avvio | `test_sketch_generation_service.py` | — | — |
+| **6. Hardening** | **Task 12.2** | Fail-Fast nei loop di generazione su errori irrecuperabili (401, 402, 403, 404) | Media | ⏳ Da fare | `test_services_failfast.py` | — | — |
+| **6. Hardening** | **Task 13.1** | Correzione algoritmo K-Means color quantization in `SvgVectorizer` | Media | ⏳ Da fare | `test_svg_vectorizer.py` | — | — |
+| **6. Hardening** | **Task 13.2** | Tagging semantico dei piani teatrali nel documento SVG (`<g id="...">`) | Medio-Alta | ⏳ Da fare | `test_svg_layering.py` | — | — |
+| **6. Hardening** | **Task 14** | Risoluzione al secondo e anti-collisione directory run (`list_recent_runs`) | Media | ⏳ Da fare | `test_output_manager.py`, `test_web_helpers.py` | — | — |
+| **6. Hardening** | **Task 15.1** | Mantenimento di Layer ed Export SVG nella Rigenerazione Web UI | Media | ⏳ Da fare | `test_web_components.py` | — | — |
+| **6. Hardening** | **Task 15.2** | Comando CLI standalone `scenografia vectorize` | Media | ⏳ Da fare | `test_vectorize_cli.py` | — | — |
 
 ---
 
@@ -70,7 +78,7 @@ Le attività sono ordinate secondo una sequenza **Bottom-Up sinergica** (5 Fasi)
   - [x] **Sotto-Task 8.1**: Estrazione dei Componenti UI in `src/scenografia/web/`
   - [x] **Sotto-Task 8.2**: Implementazione della Galleria Storico (`history_gallery.py`)
 
-### Fase 4: Nuove Funzionalità Scenografiche (Innestate sull'Architettura Pulita)
+### Fase 4: Nuove Funzionalità Scenografiche
 - [x] **Task 9**: Vettorizzazione Effettiva (Export SVG Reale)
   - [x] **Sotto-Task 9.1**: Sviluppo del modulo `SvgVectorizer`
   - [x] **Sotto-Task 9.2**: Integrazione dell'Export SVG in `OutputManager`, Service Layer, CLI e Web UI
@@ -80,3 +88,12 @@ Le attività sono ordinate secondo una sequenza **Bottom-Up sinergica** (5 Fasi)
 
 ### Fase 5: Qualità del Codice e CI/CD Automation
 - [x] **Task 11**: Pipeline CI/CD con GitHub Actions e Configurazione Linter / Type-Checking
+
+### Fase 6: Rubber Duck Hardening & Perfezionamento
+- [ ] **Task 12.1**: Correzione bug `export_svg` in `SketchGenerationService` + test end-to-end
+- [ ] **Task 12.2**: Fail-Fast nei loop di generazione su errori irrecuperabili (401, 402, 403, 404)
+- [ ] **Task 13.1**: Correzione algoritmo K-Means color quantization in `SvgVectorizer`
+- [ ] **Task 13.2**: Tagging semantico dei piani teatrali nel documento SVG (`<g id="...">`)
+- [ ] **Task 14**: Risoluzione temporale al secondo e anti-collisione directory run
+- [ ] **Task 15.1**: Mantenimento di Layer ed Export SVG nella Rigenerazione Web UI
+- [ ] **Task 15.2**: Comando CLI standalone `scenografia vectorize`
