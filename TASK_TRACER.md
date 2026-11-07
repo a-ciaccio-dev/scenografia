@@ -8,16 +8,16 @@ Alla fine di ogni task viene eseguita la suite di test dedicata e globale, segui
 
 ## 📊 Riepilogo Avanzamento
 
-**Progresso Globale:** `27 / 31` step operativi completati (**87%**)
+**Progresso Globale:** `28 / 31` step operativi completati (**90%**)
 
 ```text
-[█████████████████░░░] 87% (27/31 Task & Sotto-Task)
+[██████████████████░░] 90% (28/31 Task & Sotto-Task)
 ```
 
 - **Branch attivo**: `antigravity`
 - **Fasi totali**: 7 (Fasi 1-6 completate, Fase 7 in corso)
-- **Step operativi totali**: `31` (`27` completati, `4` rimanenti)
-- **Stato attuale**: 🚀 Fase 7: Task 17.2 completato con successo.
+- **Step operativi totali**: `31` (`28` completati, `3` rimanenti)
+- **Stato attuale**: 🚀 Fase 7: Task 18.1 completato con successo.
 
 ---
 
@@ -53,8 +53,8 @@ Alla fine di ogni task viene eseguita la suite di test dedicata e globale, segui
 | **7. Antigravity** | **Task 16** | Disaccoppiamento da OpenRouter e Antigravity come Provider Default | Media | ✅ Completato | 229 passed (81% cov) | `7820dfb` | 2026-11-07 20:47 |
 | **7. Antigravity** | **Task 17.1** | Potenziamento di `AntigravityBridgeProvider` per Generazione Immagine Teatrale | Medio-Alta | ✅ Completato | 234 passed (82% cov) | `6d7de55` | 2026-11-07 20:50 |
 | **7. Antigravity** | **Task 17.2** | Generazione Prompt Scenografico e Refining Nativo in `PromptEnhancerAgent` | Medio-Alta | ✅ Completato | 235 passed (82% cov) | `732e0f7` | 2026-11-07 20:54 |
-| **7. Antigravity** | **Task 18.1** | Aggiornamento CLI (`scenografia models` e `generate`) ad Antigravity | Media | ⏳ In corso | In attesa | — | — |
-| **7. Antigravity** | **Task 18.2** | Aggiornamento Web UI (`web_app.py` e componenti) ad Antigravity senza chiavi esterne | Media | ⏳ Pianificato | In attesa | — | — |
+| **7. Antigravity** | **Task 18.1** | Aggiornamento CLI (`scenografia models` e `generate`) ad Antigravity | Media | ✅ Completato | 236 passed (82% cov) | `130cfca` | 2026-11-07 20:56 |
+| **7. Antigravity** | **Task 18.2** | Aggiornamento Web UI (`web_app.py` e componenti) ad Antigravity senza chiavi esterne | Media | ⏳ In corso | In attesa | — | — |
 | **7. Antigravity** | **Task 19** | Prevenzione File Handle Leak su Windows (`Image.open`) e Ottimizzazione I/O Sketch | Media | ⏳ Pianificato | In attesa | — | — |
 | **7. Antigravity** | **Task 20** | Preservazione dei dettagli di errore API in `OpenRouterClient` (Fallback sicuro) | Bassa | ⏳ Pianificato | In attesa | — | — |
 
@@ -110,8 +110,8 @@ Alla fine di ogni task viene eseguita la suite di test dedicata e globale, segui
 - [x] **Task 17**: Potenziamento di `AntigravityBridgeProvider` per Generazione Immagine e Testo
   - [x] **Sotto-Task 17.1**: Rendering di canvas scenografico e integrazione subagent con metadati completi
   - [x] **Sotto-Task 17.2**: Generazione Prompt Scenografico e Refining Nativo in `PromptEnhancerAgent`
-- [ ] **Task 18**: Aggiornamento CLI e Web UI per Antigravity Nativo
-  - [ ] **Sotto-Task 18.1**: Aggiornamento CLI (`scenografia models` e `generate`) ad Antigravity
+- [x] **Task 18**: Aggiornamento CLI e Web UI per Antigravity Nativo
+  - [x] **Sotto-Task 18.1**: Aggiornamento CLI (`scenografia models` e `generate`) ad Antigravity
   - [ ] **Sotto-Task 18.2**: Aggiornamento Web UI (`web_app.py` e componenti) ad Antigravity senza chiavi esterne
 - [ ] **Task 19**: Prevenzione File Handle Leak su Windows (`Image.open`) e Ottimizzazione I/O Sketch
 - [ ] **Task 20**: Preservazione dei dettagli di errore API in `OpenRouterClient` (Fallback sicuro)
