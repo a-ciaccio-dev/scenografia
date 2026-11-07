@@ -1,5 +1,6 @@
 import re
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union
+from scenografia.schemas.brief_schema import StructuredBrief, PromptPackage
 from scenografia.tools.prompt_templates import build_final_prompt, build_negative_prompt, enforce_svg_constraints
 from scenografia.styles.loader import load_style_by_name
 
@@ -11,7 +12,7 @@ class PromptEngineerAgent:
         """Ensure that the prompt contains the fundamental SVG-safe constraints."""
         return enforce_svg_constraints(prompt)
 
-    def build_prompt_package(self, brief: dict) -> dict:
+    def build_prompt_package(self, brief: Union[StructuredBrief, Dict[str, Any]]) -> PromptPackage:
         """Build final and negative prompts for generation."""
         style_guidance = brief.get("style_guidance")
         if not style_guidance:
@@ -27,13 +28,17 @@ class PromptEngineerAgent:
             user_style=user_style,
         )
         negative_prompt = build_negative_prompt(user_style=user_style)
-        return {
-            "final_prompt": final_prompt,
-            "negative_prompt": negative_prompt,
-            "orientation_applied": brief["orientation"].value in final_prompt.lower(),
-        }
+        return PromptPackage(
+            final_prompt=final_prompt,
+            negative_prompt=negative_prompt,
+            orientation_applied=brief["orientation"].value in final_prompt.lower(),
+        )
 
-    def refine_prompt_package(self, prompt_package: dict, issues: List[str]) -> dict:
+    def refine_prompt_package(
+        self,
+        prompt_package: Union[PromptPackage, Dict[str, Any]],
+        issues: List[str]
+    ) -> PromptPackage:
         """Refine the prompt package based on validation issues."""
         final_prompt = prompt_package["final_prompt"]
         negative_prompt = prompt_package["negative_prompt"]
@@ -68,8 +73,8 @@ class PromptEngineerAgent:
                 
         final_prompt = enforce_svg_constraints(final_prompt)
         
-        return {
-            "final_prompt": final_prompt,
-            "negative_prompt": negative_prompt,
-            "orientation_applied": prompt_package.get("orientation_applied", False)
-        }
+        return PromptPackage(
+            final_prompt=final_prompt,
+            negative_prompt=negative_prompt,
+            orientation_applied=prompt_package.get("orientation_applied", False)
+        )
