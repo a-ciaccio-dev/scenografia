@@ -8,16 +8,16 @@ Alla fine di ogni task viene eseguita la suite di test dedicata e globale, segui
 
 ## 📊 Riepilogo Avanzamento
 
-**Progresso Globale:** `19 / 24` step operativi completati (**79%**)
+**Progresso Globale:** `20 / 24` step operativi completati (**83%**)
 
 ```text
-[████████████████░░░░] 79% (19/24 Task & Sotto-Task)
+[████████████████░░░░] 83% (20/24 Task & Sotto-Task)
 ```
 
 - **Branch attivo**: `antigravity`
 - **Fasi totali**: 6 (Fasi 1-5 completate, Fase 6 in corso)
-- **Step operativi totali**: `24` (`19` completati, `5` da eseguire)
-- **Stato attuale**: 🚀 In corso — Fase 6 (Task 13.1 in avvio)
+- **Step operativi totali**: `24` (`20` completati, `4` da eseguire)
+- **Stato attuale**: 🚀 In corso — Fase 6 (Task 13.2 in avvio)
 
 ---
 
@@ -45,8 +45,8 @@ Alla fine di ogni task viene eseguita la suite di test dedicata e globale, segui
 | **5. CI/CD** | **Task 11** | Pipeline CI/CD (GitHub Actions) e Configurazione Linter/Type-Checker | Media | ✅ Completato | 213 passed (77% cov) | `85c770f` | 2026-11-07 18:47 |
 | **6. Hardening** | **Task 12.1** | Correzione bug `export_svg` in `SketchGenerationService` + test end-to-end | Media | ✅ Completato | 214 passed (81% cov) | `abe1e83` | 2026-11-07 19:01 |
 | **6. Hardening** | **Task 12.2** | Fail-Fast nei loop di generazione su errori irrecuperabili (401, 402, 403, 404) | Media | ✅ Completato | 217 passed (81% cov) | `274619c` | 2026-11-07 19:03 |
-| **6. Hardening** | **Task 13.1** | Correzione algoritmo K-Means color quantization in `SvgVectorizer` | Media | ⏳ In avvio | `test_svg_vectorizer.py` | — | — |
-| **6. Hardening** | **Task 13.2** | Tagging semantico dei piani teatrali nel documento SVG (`<g id="...">`) | Medio-Alta | ⏳ Da fare | `test_svg_layering.py` | — | — |
+| **6. Hardening** | **Task 13.1** | Correzione algoritmo K-Means color quantization in `SvgVectorizer` | Media | ✅ Completato | 218 passed (81% cov) | `33e3a13` | 2026-11-07 19:05 |
+| **6. Hardening** | **Task 13.2** | Tagging semantico dei piani teatrali nel documento SVG (`<g id="...">`) | Medio-Alta | ⏳ In avvio | `test_svg_layering.py` | — | — |
 | **6. Hardening** | **Task 14** | Risoluzione al secondo e anti-collisione directory run (`list_recent_runs`) | Media | ⏳ Da fare | `test_output_manager.py`, `test_web_helpers.py` | — | — |
 | **6. Hardening** | **Task 15.1** | Mantenimento di Layer ed Export SVG nella Rigenerazione Web UI | Media | ⏳ Da fare | `test_web_components.py` | — | — |
 | **6. Hardening** | **Task 15.2** | Comando CLI standalone `scenografia vectorize` | Media | ⏳ Da fare | `test_vectorize_cli.py` | — | — |
@@ -92,7 +92,7 @@ Alla fine di ogni task viene eseguita la suite di test dedicata e globale, segui
 ### Fase 6: Rubber Duck Hardening & Perfezionamento
 - [x] **Task 12.1**: Correzione bug `export_svg` in `SketchGenerationService` + test end-to-end
 - [x] **Task 12.2**: Fail-Fast nei loop di generazione su errori irrecuperabili (401, 402, 403, 404)
-- [ ] **Task 13.1**: Correzione algoritmo K-Means color quantization in `SvgVectorizer`
+- [x] **Task 13.1**: Correzione algoritmo K-Means color quantization in `SvgVectorizer`
 - [ ] **Task 13.2**: Tagging semantico dei piani teatrali nel documento SVG (`<g id="...">`)
 - [ ] **Task 14**: Risoluzione temporale al secondo e anti-collisione directory run
 - [ ] **Task 15.1**: Mantenimento di Layer ed Export SVG nella Rigenerazione Web UI
